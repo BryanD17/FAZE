@@ -2,7 +2,7 @@
   "name": "faze",
   "private": true,
   "version": "0.1.0",
-  "description": "FAZE \u2014 gaming group finder. CS 514 Database Theory and Implementation, Fall 2026.",
+  "description": "FAZE — gaming group finder. CS 514 Database Theory and Implementation, Fall 2026.",
   "type": "module",
   "license": "UNLICENSED",
   "engines": {
@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "csv-parse": "^7.0.2",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.14.0",
