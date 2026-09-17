@@ -288,7 +288,7 @@ Status markers:  ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
 
   PHASE 1 SCOPE (must all be ✅ before Oct 19, 11:59pm)
   ✅ AGENT 00 — REPO FOUNDATION & MONOREPO SCAFFOLD
-  ⬜ AGENT 01 — DATABASE DESIGN: ER MODEL, 3NF, CORE DDL, MIGRATION RUNNER
+  ✅ AGENT 01 — DATABASE DESIGN: ER MODEL, 3NF, CORE DDL, MIGRATION RUNNER
   ⬜ AGENT 02 — DATA ACQUISITION: KAGGLE SEED + API ENRICHMENT ETL
   ⬜ AGENT 03 — ADVANCED MySQL: VIEWS, PROCEDURES, TRIGGERS, TRANSACTIONS
   ⬜ AGENT 04 — AUTH: REGISTRATION, LOGIN, SESSIONS, PASSWORD SECURITY
@@ -331,6 +331,12 @@ LEDGER NOTES (append a dated line every time an agent closes)
       validates; local evidence was gathered against a native MySQL
       8.0.46 server with the identical charset/collation. See docs/decisions.md
       "Local development runs MySQL 8.0 where 8.4 is unavailable".
+  [2026-09-17] AGENT 01 ✅ — migration runner (migrate/rollback/reset with a
+      sha256 checksum guard), migrations 0001-0005 creating 24 tables with 37
+      foreign keys, 21 CHECK constraints and 18 UNIQUE constraints, all InnoDB
+      /utf8mb4_0900_ai_ci; docs/schema.md (4.7k words) with the full data
+      dictionary, the FK map with a reason per rule, and the 1NF->2NF->3NF->
+      BCNF walkthrough; withTransaction proven by three tests.
   [2026-09-17] NOTE — Work is being delivered on the branch
       claude/new-session-rui3z9 rather than one branch per agent, because the
       session's operating instructions designate that branch and forbid pushing
@@ -2997,64 +3003,328 @@ APPENDIX A-00 — AGENT 00: REPO FOUNDATION & MONOREPO SCAFFOLD
 --------------------------------------------------------------------------------
 APPENDIX A-01 — AGENT 01: DATABASE DESIGN: ER MODEL, 3NF, CORE DDL, MIGRATION RUNNER
 --------------------------------------------------------------------------------
-  HUMAN OWNER        : Cesko2
-  STATUS             : [ ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED ]
-  DATE STARTED       : ____-__-__
-  DATE COMPLETED     : ____-__-__
-  BRANCH             : agent/agent-01-__________
-  PR NUMBER + STATE  : #____  (open / merged / closed)   MERGED AT: __________
-  COMMIT HASH ON MAIN: ________________
+  HUMAN OWNER        : Cesko2 (co-owned with Bryan)
+  STATUS             : ✅ COMPLETE
+  DATE STARTED       : 2026-09-17
+  DATE COMPLETED     : 2026-09-17
+  BRANCH             : claude/new-session-rui3z9
+  PR NUMBER + STATE  : n/a — see APPENDIX A-00 (single-branch session)
+  COMMIT HASH ON MAIN: not yet merged to main
 
   EVIDENCE PER ACCEPTANCE CRITERION
-  (one entry per [ ] box in the agent, in the same order — quote the real
-   output, do not paraphrase it)
-     1. criterion : 
-        evidence  : 
-     2. criterion : 
-        evidence  : 
-     3. criterion : 
-        evidence  : 
-     4. criterion : 
-        evidence  : 
-     5. criterion : 
-        evidence  : 
-     6. criterion : 
-        evidence  : 
-     7. criterion : 
-        evidence  : 
-     8. criterion : 
-        evidence  : 
-     9. criterion : 
-        evidence  : 
-    10. criterion : 
-        evidence  : 
-    11. criterion : 
-        evidence  : 
-    12. criterion : 
-        evidence  : 
+
+     1. criterion : `npm run db:status` shows all five migrations applied,
+                    zero pending
+        evidence  : $ npm run db:status
+                      Migration status (development)
+                      ------------------------------
+                      [applied] 0001_init_lookup_tables.sql  2026-09-17T19:47:21.000Z
+                      [applied] 0002_init_game_catalog.sql   2026-09-17T19:48:02.000Z
+                      [applied] 0003_init_users.sql          2026-09-17T19:48:59.000Z
+                      [applied] 0004_init_groups.sql         2026-09-17T19:49:54.000Z
+                      [applied] 0005_init_social.sql         2026-09-17T19:50:34.000Z
+
+                      5 applied, 0 pending.
+
+     2. criterion : `npm run db:reset` completes clean from an empty database
+        evidence  : $ npm run db:reset
+                      Resetting database `faze`
+                      -------------------------
+                        dropped and recreated `faze` (utf8mb4_0900_ai_ci)
+
+                      Applying 5 migration(s)
+                      -----------------------
+                        0001_init_lookup_tables.sql ... applied in 74ms
+                        0002_init_game_catalog.sql ... applied in 114ms
+                        0003_init_users.sql ... applied in 74ms
+                        0004_init_groups.sql ... applied in 83ms
+                        0005_init_social.sql ... applied in 60ms
+
+                      Done. 5 migrations applied in total.
+
+                      Seeds
+                      -----
+                        No seed scripts yet (AGENT 14) — schema and reference
+                        data only.
+
+                      Reset complete. `faze` is ready.
+
+     3. criterion : Re-running `npm run db:migrate` applies nothing (idempotent)
+        evidence  : $ npm run db:migrate
+                      Migrations
+                      ----------
+                      Nothing to do — all 5 migrations are applied.
+
+     4. criterion : Editing an applied migration then running db:migrate FAILS
+                    with a checksum error; then restore
+        evidence  : $ echo "-- tampered comment" >> db/migrations/0002_init_game_catalog.sql
+                    $ npm run db:migrate
+
+                      CHECKSUM MISMATCH — an already-applied migration was edited.
+
+                        0002_init_game_catalog.sql
+                          applied as : 1d8b9e154853be0371ba926bbd497ea047736e2b0f63d117645e875d1e564d6d
+                          file is now: e3d2a9b5fb563fde60489076b3840fa5ea5692ea68ca57e2dab8accc1c781aa7
+
+                      An applied migration is history and cannot be rewritten:
+                      other databases have already run the old version. Restore
+                      the file and write a NEW corrective migration instead.
+
+                    Exit code 1 — nothing was applied. After restoring the file:
+                    $ npm run db:migrate
+                      Nothing to do — all 5 migrations are applied.
+
+     5. criterion : FOREIGN KEY count >= 25
+        evidence  : $ SELECT COUNT(*) FROM information_schema.table_constraints
+                      WHERE constraint_schema='faze' AND constraint_type='FOREIGN KEY';
+                    37
+                    Every one is named fk_<child>_<parent> with an explicit
+                    ON DELETE and ON UPDATE rule; the full map with a reason per
+                    rule is docs/schema.md §3.
+
+     6. criterion : CHECK constraint count >= 8
+        evidence  : $ SELECT COUNT(*) FROM information_schema.check_constraints
+                      WHERE constraint_schema='faze';
+                    21
+                    (also 18 UNIQUE constraints and 24 domain tables +
+                    schema_migrations = 25 tables total)
+
+     7. criterion : Every table is InnoDB/utf8mb4
+        evidence  : $ SELECT table_name, engine, table_collation FROM
+                      information_schema.tables WHERE table_schema='faze';
+                    All 25 rows read InnoDB / utf8mb4_0900_ai_ci:
+                      audit_log, availability_slot, game, game_genre,
+                      game_platform, genre, group_member, group_platform,
+                      join_request, language, lfg_group, message, platform,
+                      play_session, playstyle_tag, profile, rating, region,
+                      region_adjacency, report, schema_migrations, user,
+                      user_game, user_platform, user_tag
+
+     8. criterion : A referential-integrity violation is actually rejected
+        evidence  : $ INSERT INTO user_game (user_id, game_id) VALUES (999999, 1);
+                    ERROR 1452 (23000): Cannot add or update a child row: a
+                    foreign key constraint fails (`faze`.`user_game`,
+                    CONSTRAINT `fk_user_game_user` FOREIGN KEY (`user_id`)
+                    REFERENCES `user` (`user_id`) ON DELETE CASCADE ON UPDATE
+                    RESTRICT)
+
+     9. criterion : A CHECK constraint actually fires
+        evidence  : $ INSERT INTO availability_slot
+                        (user_id,day_of_week,start_minute,end_minute)
+                      VALUES (@u,3,1200,600);
+                    ERROR 3819 (HY000): Check constraint
+                    'ck_availability_slot_order' is violated.
+
+                    The same insert with a valid range succeeds:
+                    $ INSERT ... VALUES (@u,3,1200,1400);
+                    slot_id  user_id  day_of_week  start_minute  end_minute
+                    1        1        3            1200          1400
+
+                    A second CHECK proven on a different table — the
+                    state/left_at invariant on group_member:
+                    $ INSERT INTO group_member (group_id,user_id,state,left_at)
+                      VALUES (@grp,@u,'left',NULL);
+                    ERROR 3819 (HY000): Check constraint
+                    'ck_group_member_left_at' is violated.
+
+    10. criterion : docs/schema.md contains the 1NF->2NF->3NF walkthrough
+                    naming real functional dependencies — quote the 3NF
+                    paragraph
+        evidence  : docs/schema.md §4, 4,747 words total. It starts from the
+                    unnormalized GAMER_SHEET relation a person would actually
+                    build in a spreadsheet, with a real sample row, and
+                    decomposes it. Quoting §4.3:
+
+                      "3NF requires 2NF plus: no non-key attribute depends on
+                      another non-key attribute. The spreadsheet has several.
+
+                      Case 1 — region. The sheet carries both region_code and
+                      region_name:
+                          user_id -> region_code -> region_name
+                      region_name depends on user_id only THROUGH region_code:
+                      a transitive dependency. Storing both means 'North
+                      America East' is repeated on every user row, and a rename
+                      requires touching every one. Resolve by projecting the
+                      dependent attribute into a relation keyed on the
+                      determinant: region(region_id, code, name), and
+                      profile(user_id, ..., region_id) carrying only the
+                      foreign key."
+
+                    §4.2 names the partial dependency that motivates splitting
+                    `game` out of `user_game`:
+                        (user_id, game_id) -> self_rank, hours_played, goal
+                                 game_id   -> game_title, release_date, cover_url
+                    with the three concrete anomalies (update: Valorant's cover
+                    stored 40,000 times; insertion: a game nobody plays yet
+                    cannot be recorded, which is not hypothetical because the
+                    ETL loads 20,000+ games before any user exists; deletion:
+                    the last player removing Elden Ring erases the game).
+                    §4.3 Case 4 additionally argues why user_id -> timezone ->
+                    UTC offset is NOT a functional dependency (the offset
+                    depends on the timezone AND the instant, i.e. DST) and
+                    therefore must not be stored — recognising a non-functional
+                    dependency is what keeps that part of the design correct.
+                    §4.4 checks BCNF and states the single knowing violation,
+                    lfg_group.member_count, which §6 defends.
+
+    11. criterion : `withTransaction` rolls back on throw — insert then throw,
+                    prove the row is absent
+        evidence  : server/tests/transaction.test.ts, three cases:
+                    $ npm -w @faze/server test
+                      ✓ tests/transaction.test.ts (3 tests) 55ms
+                      ✓ tests/health.test.ts (2 tests) 41ms
+                      Test Files  2 passed (2)
+                           Tests  5 passed (5)
+
+                    - "commits every statement when the callback returns":
+                      inserts a `user` AND a `profile` in one unit, then asserts
+                      both rows exist afterwards.
+                    - "rolls the whole unit back when the callback throws":
+                      inserts the user, asserts COUNT = 1 from INSIDE the
+                      transaction, throws, then asserts COUNT = 0 from the pool
+                      afterwards. Both directions are checked, so a test that
+                      passed because the insert never happened would fail.
+                    - "releases the connection on both paths": runs 20
+                      sequential failing transactions against a pool with
+                      connectionLimit 10 and then issues a query. Without the
+                      `finally { conn.release() }` this hangs forever rather
+                      than failing, which is the real-world symptom.
+
+    12. criterion : CI migrate job is green on this PR
+        evidence  : ⛔ Cannot be pasted — no PR exists (single-branch session,
+                    see APPENDIX A-00). The job's steps were run locally
+                    against a real MySQL 8 on this exact tree:
+                      npm run db:migrate  -> 5 applied
+                      npm run db:status   -> 5 applied, 0 pending
+                      npm test            -> 5 passed
+                    The workflow's `test -f db/scripts/migrate.js` guard now
+                    passes, so the step that deliberately failed loudly during
+                    AGENT 00 will execute the real migration. `npm run db:verify`
+                    is still skipped by the workflow until AGENT 03 delivers
+                    verify_objects.js.
 
   FILES ADDED / CHANGED (with a one-line purpose each)
-    - 
-    - 
-    - 
+    - db/scripts/_lib.js .......... shared runner plumbing: connection, sha256,
+                                    migration listing, production guard
+    - db/scripts/migrate.js ....... applies pending migrations; --status mode;
+                                    aborts the whole run on a checksum mismatch
+    - db/scripts/rollback.js ...... runs the newest paired .down.sql (N steps)
+    - db/scripts/reset.js ......... drop + create + migrate + seed, dev only
+    - db/migrations/0001_init_lookup_tables.sql  platform, region,
+                                    region_adjacency, language, genre,
+                                    playstyle_tag + their reference rows
+    - db/migrations/0002_init_game_catalog.sql   game (+FULLTEXT ft_game_title),
+                                    game_genre, game_platform
+    - db/migrations/0003_init_users.sql          user, profile, user_platform,
+                                    user_tag, user_game, availability_slot
+    - db/migrations/0004_init_groups.sql         lfg_group, group_platform,
+                                    group_member, join_request, play_session
+    - db/migrations/0005_init_social.sql         message, rating, report,
+                                    audit_log
+    - db/migrations/000{1..5}_*.down.sql         paired reversals, children first
+    - docs/schema.md .............. 4.7k-word data dictionary, FK map with a
+                                    reason per rule, 1NF->2NF->3NF->BCNF
+                                    walkthrough, the denormalization defense,
+                                    and the REPEATABLE READ / FOR UPDATE
+                                    discussion
+    - server/tests/transaction.test.ts  proves commit, rollback and connection
+                                    release for withTransaction
+    - .gitignore .................. added client/server/shared src/**/*.js to
+                                    stop compiled output being committed again
 
   SQL OBJECTS TOUCHED (migrations, views, procedures, triggers, indexes)
-    - 
+    - 24 tables + schema_migrations. 37 FKs, 21 CHECKs, 18 UNIQUEs.
+    - Named indexes created here, each serving a stated query:
+        ft_game_title (FULLTEXT)            -> GET /api/games/search
+        idx_lfg_group_recruit(game_id,status,region_id,last_activity_at)
+                                            -> the browse/matchmaking filter
+        idx_lfg_group_owner                 -> "groups I own"
+        idx_group_member_user_state         -> GET /api/me/groups
+        idx_group_member_group_state_joined -> owner succession in sp_leave_group
+        idx_user_game_game_rank(game_id,rank_tier)
+                                            -> GET /api/groups/:id/candidates
+        idx_availability_slot_user_day(user_id,day_of_week,start_minute)
+                                            -> the availability-overlap join
+        idx_message_group_time(group_id,created_at,message_id)
+                                            -> backwards keyset message paging
+        idx_join_request_group_state        -> the owner's pending-request queue
+        idx_play_session_group_starts       -> "next upcoming session"
+        idx_report_state_created            -> the admin report queue
+      AGENT 16 proves or removes each of these with EXPLAIN evidence.
+    - No views, procedures or triggers yet — those are AGENT 03 (0007-0010).
+      Note that member_count and last_activity_at are therefore NOT yet
+      maintained: nothing writes them until the triggers exist. That is
+      expected and is why AGENT 03 is next.
 
   REGRESSIONS FOUND AND FIXED WHILE DOING THIS AGENT
-    - 
+    - AGENT 00 committed two stray compiled files, client/src/App.js and
+      client/src/main.js, emitted by the broken `tsc -b --noEmit false`
+      typecheck script before it was corrected. They lint-failed as browser
+      globals in a Node context. Deleted, and .gitignore now covers
+      client|server|shared/src/**/*.js so compiled output beside a .tsx source
+      is impossible to commit again. client/src/vite-env.d.ts is real source
+      and was restored after the cleanup.
+    - MySQL rejected the first draft of region_adjacency: a column cannot carry
+      both a CHECK constraint and an FK referential action ("Column 'region_id'
+      cannot be used in a check constraint 'ck_region_adjacency_not_self':
+      needed in a foreign key constraint ... referential action"). Changed the
+      two FKs to ON UPDATE RESTRICT, which is the correct rule anyway — region
+      ids are assigned by hand precisely so they never change — and documented
+      the constraint in the migration comment and docs/schema.md §3 so the next
+      person does not rediscover it.
 
-  DEVIATIONS FROM THE PLAN (what this document said vs what you built,
-  and why the deviation is correct — then update the relevant SECTION)
-    - 
+  DEVIATIONS FROM THE PLAN (what this document said vs what you built, and why)
+    - Task 1 asked for a separate db/scripts/status.js. Implemented instead as
+      `migrate.js --status`, wired to the same `npm run db:status` script the
+      document specifies. One file means the status view and the apply path can
+      never disagree about what "pending" means, which is the bug a separate
+      script invites.
+    - Task 9 (server/src/db/pool.ts) was already delivered in AGENT 00 because
+      GET /api/health needed a real SELECT 1. Verified here rather than
+      rewritten: connectionLimit 10, namedPlaceholders, timezone 'Z',
+      decimalNumbers, plus withTransaction — all as specified, now with tests.
+    - The migration runner wraps each file in a transaction as instructed, but
+      the comment in migrate.js is explicit that this CANNOT make DDL atomic:
+      MySQL commits implicitly on CREATE/ALTER. The real defense is that every
+      migration is idempotent, which makes a retry after a mid-file failure
+      safe. This was proven in practice — the first run of 0001 failed partway
+      on the CHECK/FK conflict above, and simply re-running after the fix
+      completed cleanly.
+    - Added constraints beyond the document's list where an invariant was
+      cheap to enforce and expensive to violate: ck_group_member_left_at,
+      ck_join_request_decided_at, ck_message_body_not_empty,
+      ck_play_session_duration, ck_lfg_group_member_count,
+      ck_game_metacritic_range. Each is justified in the migration comments.
 
   ⛔ BLOCKED ITEMS (exact human action required, and who must do it)
-    - owner action : 
-      assigned to  : 
-      blocks       : 
+    - owner action : none for this agent. (The ER DIAGRAM named in this agent's
+                     title is produced by AGENT 18 task 1, which is where the
+                     Workbench export ⛔ will land.)
+      assigned to  : —
+      blocks       : —
 
   NOTES FOR THE NEXT AGENT (anything downstream work needs to know)
-    - 
+    - member_count and last_activity_at have NO writer yet. Until AGENT 03's
+      triggers land, member_count stays 0 and v_member_count_reconciliation
+      does not exist. Do not paper over this in application code — that is
+      anti-pattern C3.
+    - Staging tables (stg_*, etl_run, etl_reject) are AGENT 02's migration
+      0006. The next free migration number is 0006.
+    - The reference data AGENT 02 needs already exists and is stable:
+      5 platforms (PC=1, PlayStation=2, Xbox=3, Switch=4, Mobile=5),
+      8 regions (NA-East=1, NA-West=2, EU-West=3, EU-East=4, SA=5, APAC=6,
+      OCE=7, ME=8), 16 symmetric adjacency rows, 12 languages, 9 playstyle
+      tags. `genre` is intentionally EMPTY — the ETL upserts genres by slug as
+      it discovers them in the Steam data.
+    - Steam's windows/mac/linux all map to platform_id 1 (PC). There is no
+      separate Mac or Linux row, by design.
+    - game.estimated_owners is a bucket STRING, not a number. Parse it for
+      ordering; do not store a fabricated numeric midpoint.
+    - user_game and lfg_group both hold ON DELETE RESTRICT against game. An ETL
+      that tries to delete a game anyone plays or has a group for will fail
+      loudly. That is intended — handle it, do not drop the constraint.
+    - Both `faze` and `faze_test` are migrated. Set NODE_ENV=test and the
+      runner and the pool both switch to faze_test automatically.
 
 --------------------------------------------------------------------------------
 APPENDIX A-02 — AGENT 02: DATA ACQUISITION: KAGGLE SEED + API ENRICHMENT ETL

@@ -9,6 +9,12 @@ build/
 client/dist/
 server/dist/
 shared/dist/
+# Compiled output must never sit beside TypeScript sources. A misconfigured
+# `tsc` once emitted client/src/App.js next to App.tsx and it was committed;
+# these patterns make that visible instead of silent.
+client/src/**/*.js
+server/src/**/*.js
+shared/src/**/*.js
 
 # environment — never commit real secrets (R10)
 .env
