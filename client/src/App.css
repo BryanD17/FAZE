@@ -1,0 +1,104 @@
+.home {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  background: #111111;
+  color: white;
+  text-align: center;
+}
+
+.hero {
+  z-index: 2;
+  max-width: 700px;
+  padding: 40px;
+  animation: fadeUp 0.8s ease-out;
+}
+
+.eyebrow {
+  letter-spacing: 4px;
+  font-size: 14px;
+  color: #999999;
+}
+
+h1 {
+  font-size: 90px;
+  margin: 10px 0;
+}
+
+.description {
+  font-size: 20px;
+  color: #cccccc;
+  line-height: 1.5;
+  margin-bottom: 30px;
+}
+
+.browseButton {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.browseButton:hover {
+  transform: scale(1.07);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+}
+
+.floatingCard {
+  position: absolute;
+  padding: 14px 22px;
+
+  background: #222222;
+  border: 1px solid #444444;
+  border-radius: 12px;
+
+  animation: float 4s ease-in-out infinite;
+}
+
+.cardOne {
+  top: 20%;
+  left: 15%;
+}
+
+.cardTwo {
+  bottom: 20%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.cardThree {
+  top: 25%;
+  right: 18%;
+  animation-delay: 2s;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-15px);
+  }
+}
