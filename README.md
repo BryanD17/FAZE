@@ -1,7 +1,7 @@
 # FAZE — find your group
 
 **CS 514: Database Theory and Implementation — Fall 2026**
-Bryan Djenabia · adhduy · Česko² · rita · Arman
+Bryan D · Alvin · Česko² · rita · Arman
 
 ---
 
