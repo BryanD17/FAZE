@@ -289,7 +289,7 @@ Status markers:  ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   PHASE 1 SCOPE (must all be ✅ before Oct 19, 11:59pm)
   ✅ AGENT 00 — REPO FOUNDATION & MONOREPO SCAFFOLD
   ✅ AGENT 01 — DATABASE DESIGN: ER MODEL, 3NF, CORE DDL, MIGRATION RUNNER
-  ⬜ AGENT 02 — DATA ACQUISITION: KAGGLE SEED + API ENRICHMENT ETL
+  ✅ AGENT 02 — DATA ACQUISITION: KAGGLE SEED + API ENRICHMENT ETL
   ⬜ AGENT 03 — ADVANCED MySQL: VIEWS, PROCEDURES, TRIGGERS, TRANSACTIONS
   ⬜ AGENT 04 — AUTH: REGISTRATION, LOGIN, SESSIONS, PASSWORD SECURITY
   ⬜ AGENT 05 — GAMER PROFILES: GAMES, PLATFORMS, REGIONS, PLAYSTYLE TAGS
@@ -337,6 +337,26 @@ LEDGER NOTES (append a dated line every time an agent closes)
       /utf8mb4_0900_ai_ci; docs/schema.md (4.7k words) with the full data
       dictionary, the FK map with a reason per rule, and the 1NF->2NF->3NF->
       BCNF walkthrough; withTransaction proven by three tests.
+  [2026-09-24] AGENT 02 ✅ — staging + ETL bookkeeping (migration 0006),
+      a 5-stage pipeline (download/load/transform/enrich/curate), 118,001
+      games loaded from a real 140,082-row Steam catalog export with 22,821
+      correctly flagged is_multiplayer, 326,743 genre links across 63
+      deduplicated genres, and 309 curated titles for onboarding. Idempotent
+      and deterministic (verified across repeat runs). Two real bugs found
+      and fixed during this pass — a mis-derived cover_url that defeated its
+      own acceptance criterion, and a locale-scraping issue that mis-flagged
+      Counter-Strike 2, Dota 2 and Elden Ring as non-multiplayer and
+      fragmented the genre table — see APPENDIX A-02 for the full account.
+  [2026-09-24] AGENT 02 ⛔ — RAWG enrichment blocked on two independent
+      things: Bryan needs to create a RAWG_API_KEY at rawg.io/apidocs and set
+      it in .env; separately, api.rawg.io is unreachable from THIS
+      development sandbox's network egress policy (confirmed via curl — a
+      403 from the environment's own proxy, not from RAWG), which will not
+      affect a teammate's own machine or production. game.cover_url is
+      honestly NULL for all 118,001 games until this is resolved; nothing was
+      faked to work around it. Kaggle is also blocked (no ~/.kaggle/kaggle.json
+      token) — the pipeline used a public no-credential Steam catalog mirror
+      with the identical shape instead, documented in docs/data.md §1.1.
   [2026-09-17] NOTE — Work is being delivered on the branch
       claude/new-session-rui3z9 rather than one branch per agent, because the
       session's operating instructions designate that branch and forbid pushing
@@ -3330,63 +3350,263 @@ APPENDIX A-01 — AGENT 01: DATABASE DESIGN: ER MODEL, 3NF, CORE DDL, MIGRATION 
 APPENDIX A-02 — AGENT 02: DATA ACQUISITION: KAGGLE SEED + API ENRICHMENT ETL
 --------------------------------------------------------------------------------
   HUMAN OWNER        : Arman
-  STATUS             : [ ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED ]
-  DATE STARTED       : ____-__-__
-  DATE COMPLETED     : ____-__-__
-  BRANCH             : agent/agent-02-__________
-  PR NUMBER + STATE  : #____  (open / merged / closed)   MERGED AT: __________
-  COMMIT HASH ON MAIN: ________________
+  STATUS             : ✅ COMPLETE (RAWG enrichment sub-task ⛔ BLOCKED — see below)
+  DATE STARTED       : 2026-09-24
+  DATE COMPLETED     : 2026-09-24
+  BRANCH             : agent/agent-02-etl
+  PR NUMBER + STATE  : opened against main in this session
+  COMMIT HASH ON MAIN: pending merge
 
   EVIDENCE PER ACCEPTANCE CRITERION
-  (one entry per [ ] box in the agent, in the same order — quote the real
-   output, do not paraphrase it)
-     1. criterion : 
-        evidence  : 
-     2. criterion : 
-        evidence  : 
-     3. criterion : 
-        evidence  : 
-     4. criterion : 
-        evidence  : 
-     5. criterion : 
-        evidence  : 
-     6. criterion : 
-        evidence  : 
-     7. criterion : 
-        evidence  : 
-     8. criterion : 
-        evidence  : 
-     9. criterion : 
-        evidence  : 
-    10. criterion : 
-        evidence  : 
-    11. criterion : 
-        evidence  : 
-    12. criterion : 
-        evidence  : 
+
+     1. criterion : SELECT COUNT(*) FROM game >= 20,000
+        evidence  : $ SELECT COUNT(*) FROM game;
+                    118001
+
+     2. criterion : SELECT COUNT(*) FROM game WHERE is_multiplayer = 1 >= 2,000
+        evidence  : $ SELECT COUNT(*) FROM game WHERE is_multiplayer = 1;
+                    22821
+
+     3. criterion : game_genre >= 30,000 AND game_platform >= 20,000
+        evidence  : $ SELECT COUNT(*) FROM game_genre;
+                    326743
+                    $ SELECT COUNT(*) FROM game_platform;
+                    118001
+
+     4. criterion : cover_url IS NOT NULL >= 300, OR a ⛔ BLOCKED entry naming
+                    RAWG_API_KEY with the exact signup URL
+        evidence  : $ SELECT COUNT(*) FROM game WHERE cover_url IS NOT NULL;
+                    0
+                    ⛔ BLOCKED, two independent reasons, both recorded:
+                      1. RAWG_API_KEY is not set. Sign up at
+                         https://rawg.io/apidocs, copy the key, set it in
+                         .env. Bryan: this is an owner action.
+                      2. api.rawg.io is unreachable from this development
+                         sandbox's network egress policy — confirmed with:
+                           $ curl -sSI https://api.rawg.io/api/games
+                           HTTP/2 403 (this environment's proxy: "Host not in
+                           allowlist"), not a RAWG response. This will not
+                           affect a teammate's own machine.
+                    An EARLIER draft of 20_transform.js derived a constructed
+                    (unverified) Steam CDN header URL for every game's
+                    cover_url, which would have satisfied this criterion's
+                    letter while defeating its purpose — it was found and
+                    reverted; see REGRESSIONS below. cover_url is honestly
+                    NULL until real RAWG enrichment runs.
+                    30_enrich_rawg.js itself is fully implemented and tested
+                    for its logic (missing-key detection, the network-vs-API-
+                    error distinction, 429 backoff, response caching, 0.82
+                    title-similarity matching) — only the live API call could
+                    not be exercised end-to-end in this environment.
+
+     5. criterion : zero duplicate slugs
+        evidence  : $ SELECT slug, COUNT(*) c FROM game GROUP BY slug HAVING c > 1;
+                    (empty result set)
+
+     6. criterion : re-running npm run etl:all changes no row counts
+        evidence  : Before a second full run: game 118001, multiplayer 22821,
+                    game_genre 326743, game_platform 118001, curated 309,
+                    genre 63. After: identical across every metric. Also
+                    verified for the earlier load+transform pair alone
+                    (etl_run rows 1-4 vs 5-8 in the table below show
+                    byte-identical rows_in/rows_loaded/rows_rejected).
+
+     7. criterion : SELECT * FROM etl_run ORDER BY run_id DESC LIMIT 5 shows
+                    success rows with rows_in/loaded/rejected populated
+        evidence  : run_id source     rows_in   rows_loaded rows_rejected status
+                    8       curate    0         0           0             success
+                    7       rawg      0         0           0             success
+                    6       transform 140082    118001      22081         success
+                    5       steam_csv 1156080   1016003     0             success
+                    4       curate    0         0           0             success
+                    (rows 1-4 are the first full run; 5-8 the idempotency
+                    re-run — identical numbers confirm determinism)
+
+     8. criterion : rejects are captured not swallowed — GROUP BY reason
+                    shows a real taxonomy
+        evidence  : $ SELECT reason bucket, COUNT(*) FROM etl_reject GROUP BY reason...
+                    not a game (app_type=demo)            17891  (x2 runs = 35782)
+                    duplicate slug ... lost tiebreak       2282  (x2 runs = 4564)
+                    title produced an empty slug           1908  (x2 runs = 3816)
+                    Reconciles exactly: 140082 staged - 17891 - 2282 - 1908
+                    = 118001 promoted, every run.
+
+     9. criterion : spot-check 5 famous titles for correct genre/platform rows
+        evidence  : Valorant, Rocket League, CS2, Minecraft, Elden Ring named
+                    by the criterion. Valorant and Minecraft are confirmed
+                    genuinely absent (not Steam titles — verified, not
+                    assumed — docs/data.md §3.5). The other three:
+                      Counter-Strike 2 | counter-strike-2 | is_multiplayer=1
+                        | genres: Action, Free to Play | platform: PC
+                      Rocket League® | rocket-league | is_multiplayer=1
+                        | genres: Action, Indie, Racing, Sports | platform: PC
+                      ELDEN RING | elden-ring | is_multiplayer=1
+                        | genres: Action, RPG | platform: PC
+                    (Rocket League® and Overwatch®/HELLDIVERS™ display real
+                    trademark symbols from Steam's own title strings —
+                    confirmed correct UTF-8 at the byte level, not a display
+                    bug: 0xC2 0xAE is the correct encoding of ®.)
+
+    10. criterion : the ETL survives a truncated/corrupt CSV row without
+                    aborting the run — inject one, paste the reject row,
+                    confirm the run still finished
+        evidence  : Injected an unclosed-quote corruption at the tail of
+                    games.csv. BEFORE the fix, this crashed the entire run:
+                      [steam_csv] FAILED: Quote Not Closed: the parsing is
+                      finished with an opening quote at line 140119
+                      status=failed, rows_in=0, rows_loaded=0
+                    Found and fixed (see REGRESSIONS): wrapped the streaming
+                    loop in try/catch. AFTER the fix, re-run with the same
+                    corruption:
+                      [steam_csv] success — in 1156065, loaded 1015988,
+                      rejected 1, field-warnings 0 (16.1s)
+                    $ SELECT reason FROM etl_reject WHERE reason LIKE
+                      'CSV parse error%' ORDER BY reject_id DESC LIMIT 1;
+                    "CSV parse error in games.csv after row 140067: Quote Not
+                    Closed: the parsing is finished with an opening quote at
+                    line 140119"
+                    The run finished as success with 140,067 of 140,082 rows
+                    (99.99%) staged before the corruption point.
+
+    11. criterion : docs/data.md includes real row counts from the run you
+                    just did
+        evidence  : docs/data.md §4 "A real run, in full" quotes the exact
+                    etl_run table and reject taxonomy pasted above, plus the
+                    final catalog metrics table. 2,871 words total, 8 sections.
 
   FILES ADDED / CHANGED (with a one-line purpose each)
-    - 
-    - 
-    - 
+    - db/migrations/0006_init_staging_and_etl.sql  staging tables, etl_run,
+                                    etl_reject, game.is_curated column + index
+    - db/migrations/0006_*.down.sql  paired reversal
+    - db/etl/_etl_lib.js .......... shared connection, run bookkeeping
+                                    (reject + non-fatal warn), slugify, cleanText
+    - db/etl/00_download.sh ....... Kaggle-first, no-credential-mirror fallback
+    - db/etl/10_load_staging.js ... streaming CSV loader; hardened against a
+                                    structural parse error crashing the run
+    - db/etl/20_transform.js ...... staging -> core: filter, slug, dedupe,
+                                    parse dates, derive is_multiplayer/party
+                                    size, locale-translate categories AND
+                                    genres, upsert genre/game_genre/game_platform
+    - db/etl/30_enrich_rawg.js .... RAWG enrichment; missing-key + network-
+                                    block detection, caching, fuzzy matching
+    - db/etl/40_curate_multiplayer.js  data-driven + logged-manual-topup
+                                    curated shortlist
+    - docs/data.md ................ 2,871-word writeup: sources, licensing,
+                                    the full pipeline mapping table, every
+                                    data-quality finding with its evidence and
+                                    fix, a real run's numbers, reproduction steps
+    - db/data/README.md ........... 3-command reproduction guide
+    - package.json ................ etl:download/load/transform/enrich/curate/all
 
   SQL OBJECTS TOUCHED (migrations, views, procedures, triggers, indexes)
-    - 
+    - stg_steam_game, stg_steam_genre, stg_steam_category (staging; loose
+      types, truncated and reloaded each run)
+    - etl_run, etl_reject (bookkeeping)
+    - game.is_curated column + idx_game_curated_multiplayer index
 
   REGRESSIONS FOUND AND FIXED WHILE DOING THIS AGENT
-    - 
+    - An early draft derived game.cover_url from a constructed (never
+      verified) Steam CDN URL for every game. This would have made
+      acceptance criterion 4 pass on its letter while defeating its purpose
+      (the count is supposed to prove real enrichment happened). Reverted:
+      cover_url is now written ONLY by 30_enrich_rawg.js from an actual API
+      response; the transform stage's INSERT no longer names the column at
+      all, so a re-run can never clobber a RAWG-set value either.
+    - is_multiplayer silently undercounted: 161 of 134,393 staged apps
+      (including Counter-Strike 2 and Dota 2) have categories scraped in a
+      non-English locale that a purely-English match set missed entirely.
+      Found by spot-checking the acceptance criterion's named titles. Fixed
+      with an exhaustive (not sampled) translation of every one of the 154
+      distinct non-ASCII category strings that denotes multiplayer play,
+      across every locale present (Polish, Russian, Chinese x2, Spanish,
+      French, German, Finnish, Japanese). Verified language-blind: every app
+      carrying a translated multiplayer signal now matches is_multiplayer=1,
+      zero mismatches across 25,835 apps.
+    - The identical locale problem fragmented the `genre` reference table
+      itself (worse than the multiplayer flag, since it split one real genre
+      into several rows). Fixed with GENRE_TRANSLATIONS applied before
+      slugging, in both the upsert and the linking step. genre table went
+      from 69 rows (with duplicates) to 63 (canonical), verified by iterating
+      every row's actual Unicode code points (not MySQL's RLIKE, which gave
+      false positives under utf8mb4 — see docs/data.md's tooling note).
+    - stg_steam_game.concurrent_users was always NULL: the loader read
+      r.concurrent_users but the real CSV column is
+      concurrent_users_yesterday. Silent since undefined maps to NULL with no
+      error. Found because the curation stage needed a real popularity
+      signal. Fixed the column name; re-verified real values load
+      (Counter-Strike 2: 1,180,219).
+    - A structural CSV parse error (an injected unclosed quote) crashed the
+      entire 140,000-row load rather than costing only the corrupted tail —
+      violating acceptance criterion 10 outright. Fixed by wrapping both
+      streaming loops (the shared loadCsv() helper and the inline SteamSpy
+      loop) in try/catch, flushing whatever staged successfully, and logging
+      one etl_reject row naming the exact failure point.
+    - The mysql2 client connection in db/etl/_etl_lib.js passed
+      maxAllowedPacket, which is not a real mysql2 option and only produced
+      an "Ignoring invalid configuration option" warning on every run.
+      Removed; it did nothing.
 
-  DEVIATIONS FROM THE PLAN (what this document said vs what you built,
-  and why the deviation is correct — then update the relevant SECTION)
-    - 
+  DEVIATIONS FROM THE PLAN (what this document said vs what you built, and why)
+    - Task 2's primary path (Kaggle) is blocked on a missing
+      ~/.kaggle/kaggle.json token; 00_download.sh falls back to a public,
+      no-credential mirror with the identical shape (one app table + two
+      long-format genre/category tables), so the pipeline is reproducible on
+      a fresh clone without any account. Documented with the exact source URL
+      and license reasoning in docs/data.md §1.1. Kaggle remains the
+      preferred path and needs no code change once a token exists.
+    - IGDB was not attempted as a second enrichment source. RAWG alone was
+      the scoped task, and IGDB would hit the same environment network block
+      RAWG did, so attempting it would not have changed the outcome.
+    - §1.5's PR workflow: opened as agent/agent-02-etl per this session's
+      explicit instruction to treat this work like a normal collaborator PR,
+      distinct from AGENT 00/01 which were delivered on the session's
+      designated branch (see APPENDIX A-00's deviation note for that
+      history). This is the first agent in this session opened as its own
+      named branch/PR.
 
   ⛔ BLOCKED ITEMS (exact human action required, and who must do it)
-    - owner action : 
-      assigned to  : 
-      blocks       : 
+    - owner action : Create a RAWG API key at https://rawg.io/apidocs and set
+                     RAWG_API_KEY in .env.
+      assigned to  : Bryan
+      blocks       : game.cover_url, game.short_description, game.metacritic,
+                     game.rawg_id for all 118,001 games. The onboarding game
+                     picker and browse cards will show no cover art until
+                     this runs.
+    - owner action : Separately from the key: confirm api.rawg.io is reachable
+                     from wherever etl:enrich actually runs (a teammate's
+                     laptop or the production host) — it was blocked by THIS
+                     development sandbox's own network egress policy, which
+                     will not apply elsewhere, but this should be confirmed
+                     rather than assumed once the key exists.
+      assigned to  : Bryan or whoever runs the enrichment stage
+      blocks       : same as above
+    - owner action : (optional, not blocking) provision a Kaggle token at
+                     kaggle.com/settings so etl:download uses the primary,
+                     larger, better-maintained source instead of the fallback
+                     mirror.
+      assigned to  : Bryan (or whoever runs the ETL locally)
+      blocks       : nothing today — the fallback mirror already satisfies
+                     every acceptance criterion.
 
   NOTES FOR THE NEXT AGENT (anything downstream work needs to know)
-    - 
+    - game.cover_url is NULL for every row right now. AGENT 05/10-12 (game
+      search, browse cards) MUST implement the empty-cover-art state (rule
+      R8) rather than assuming a cover is always present — that assumption
+      would be wrong for 100% of the catalog until RAWG unblocks.
+    - is_multiplayer and genre are now correct and locale-clean; AGENT 03's
+      views and AGENT 07's matchmaking query can trust them without
+      re-validating.
+    - game.is_curated marks the 309-game onboarding shortlist AGENT 11's
+      "popular multiplayer games" picker (§6 AGENT 11 step 2) should query.
+    - The genre table has 63 rows, not a large open-ended set — safe to
+      render as a fixed filter list in the UI without pagination.
+    - db/data/cache/rawg/ will start filling the moment RAWG_API_KEY works;
+      it's gitignored and safe to delete to force a re-fetch.
+    - Five well-known titles (Valorant, LoL, Fortnite, Minecraft, WoW) are
+      genuinely absent from the catalog because they are not Steam titles.
+      If a teammate reports "the search doesn't find Valorant," that is
+      correct behavior for the current data sources, not a bug — see
+      docs/data.md §3.5.
 
 --------------------------------------------------------------------------------
 APPENDIX A-03 — AGENT 03: ADVANCED MySQL: VIEWS, PROCEDURES, TRIGGERS, TRANSACTIONS
