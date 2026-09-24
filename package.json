@@ -26,10 +26,17 @@
     "db:status": "node db/scripts/migrate.js --status",
     "db:reset": "node db/scripts/reset.js",
     "db:verify": "node db/scripts/verify_objects.js",
-    "prepare": "npm run build --workspace=@faze/shared"
+    "prepare": "npm run build --workspace=@faze/shared",
+    "etl:download": "bash db/etl/00_download.sh",
+    "etl:load": "node db/etl/10_load_staging.js",
+    "etl:transform": "node db/etl/20_transform.js",
+    "etl:enrich": "node db/etl/30_enrich_rawg.js",
+    "etl:curate": "node db/etl/40_curate_multiplayer.js",
+    "etl:all": "npm run etl:download && npm run etl:load && npm run etl:transform && npm run etl:enrich && npm run etl:curate"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "csv-parse": "^7.0.2",
     "eslint": "^9.17.0",
     "eslint-config-prettier": "^9.1.0",
     "globals": "^15.14.0",
