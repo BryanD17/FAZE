@@ -1,0 +1,44 @@
+{
+  "name": "faze",
+  "private": true,
+  "version": "0.1.0",
+  "description": "FAZE \u2014 gaming group finder. CS 514 Database Theory and Implementation, Fall 2026.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20"
+  },
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=server & npm run dev --workspace=client",
+    "build": "npm run build --workspace=shared && npm run build --workspace=server && npm run build --workspace=client",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate": "node db/scripts/migrate.js",
+    "db:rollback": "node db/scripts/rollback.js",
+    "db:status": "node db/scripts/migrate.js --status",
+    "db:reset": "node db/scripts/reset.js",
+    "db:verify": "node db/scripts/verify_objects.js",
+    "prepare": "npm run build --workspace=@faze/shared"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.14.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "mysql2": "^3.11.5"
+  }
+}

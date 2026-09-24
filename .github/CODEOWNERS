@@ -1,0 +1,32 @@
+# Bryan is the required reviewer on everything that reaches main (§4.2).
+*                       @BryanD17
+
+# Lane owners are auto-requested alongside Bryan so a change lands in front of
+# the person who owns that surface (§4.2). Lanes exist so four people can move
+# at once; reviewing your own lane is how that stays true.
+
+# Česko² — schema, advanced SQL objects, groups backend, security hardening
+/db/migrations/         @BryanD17 @Cesko2
+/server/src/db/queries/ @BryanD17 @Cesko2
+/server/src/repositories/ @BryanD17 @Cesko2
+/docs/schema.md         @BryanD17 @Cesko2
+/docs/security.md       @BryanD17 @Cesko2
+
+# adhduy — auth, profiles, messaging, realtime, deployment
+/server/src/routes/auth.ts    @BryanD17 @LilAlFrmdao
+/server/src/routes/users.ts   @BryanD17 @LilAlFrmdao
+/server/src/realtime/         @BryanD17 @LilAlFrmdao
+/docs/deployment.md           @BryanD17 @LilAlFrmdao
+
+# rita — the entire visual layer; sole owner of the UI primitives
+/client/                      @BryanD17 @ritaatech
+/client/src/components/ui/    @ritaatech
+/docs/frontend.md             @BryanD17 @ritaatech
+
+# Arman — data, ETL, seeds, QA
+/db/etl/                @BryanD17 @Thrakos
+/db/seeds/              @BryanD17 @Thrakos
+/server/tests/          @BryanD17 @Thrakos
+/docs/data.md           @BryanD17 @Thrakos
+/docs/testing.md        @BryanD17 @Thrakos
+/docs/demo.md           @BryanD17 @Thrakos

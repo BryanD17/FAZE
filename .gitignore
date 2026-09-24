@@ -1,0 +1,46 @@
+# dependencies
+node_modules/
+.npm/
+
+# build output
+dist/
+build/
+*.tsbuildinfo
+client/dist/
+server/dist/
+shared/dist/
+# Compiled output must never sit beside TypeScript sources. A misconfigured
+# `tsc` once emitted client/src/App.js next to App.tsx and it was committed;
+# these patterns make that visible instead of silent.
+client/src/**/*.js
+server/src/**/*.js
+shared/src/**/*.js
+
+# environment — never commit real secrets (R10)
+.env
+.env.local
+.env.*.local
+
+# data: raw dumps, API caches and database dumps are reproducible, not source
+db/data/raw/*
+!db/data/raw/.gitkeep
+db/data/cache/*
+!db/data/cache/.gitkeep
+db/dumps/*
+!db/dumps/.gitkeep
+
+# test + coverage artifacts
+coverage/
+.nyc_output/
+*.lcov
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# logs
+*.log
+npm-debug.log*

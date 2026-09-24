@@ -1,0 +1,93 @@
+# FAZE continuous integration.
+#
+# A red main blocks four other people (anti-pattern C20), so every push and
+# every PR runs the same gates a contributor runs locally:
+#   lint -> format -> typecheck -> build -> unit tests
+# and, in a separate job against a real MySQL service container:
+#   migrate -> verify database objects -> integration tests
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static:
+    name: lint, typecheck, build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run typecheck
+      - run: npm run build
+
+  database:
+    name: migrate and test against MySQL
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: faze
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: root
+      DB_NAME: faze
+      DB_NAME_TEST: faze_test
+      NODE_ENV: test
+      LOG_LEVEL: silent
+      JWT_ACCESS_SECRET: ci-access-secret-not-used-outside-ci
+      JWT_REFRESH_SECRET: ci-refresh-secret-not-used-outside-ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Create the test database
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot \
+            -e "CREATE DATABASE IF NOT EXISTS faze_test
+                CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;"
+
+      # AGENT 01 delivers db/scripts/migrate.js. Until it exists this step
+      # fails loudly rather than passing a green tick on work that is absent.
+      - name: Apply migrations
+        run: |
+          test -f db/scripts/migrate.js \
+            || { echo "::error::db/scripts/migrate.js is missing (AGENT 01)"; exit 1; }
+          npm run db:migrate
+          npm run db:status
+
+      - name: Verify database objects still exist
+        run: |
+          if [ -f db/scripts/verify_objects.js ]; then npm run db:verify; else
+            echo "verify_objects.js not present yet (AGENT 03) — skipping";
+          fi
+
+      - name: Run tests
+        run: npm test

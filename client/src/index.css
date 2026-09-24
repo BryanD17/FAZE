@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-surface text-content-primary font-sans antialiased;
+  }
+
+  /* Accessibility is a requirement, not a stretch goal: every interactive
+     element keeps a visible focus ring for keyboard users. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-surface;
+  }
+}
