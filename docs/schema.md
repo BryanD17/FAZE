@@ -621,6 +621,160 @@ Schema changes are numbered SQL files under `db/migrations/`, applied by
 
 ## 9. Database programming
 
-Views, stored procedures, triggers and the index justification are delivered by
-AGENT 03 in migrations `0007`–`0010`, and documented in the **DATABASE
-PROGRAMMING** section appended to this file.
+**Owner:** Česko² · **Source of truth:** `db/migrations/0007`–`0010`,
+verified by `db/scripts/verify_objects.js`
+
+This is where a database course's grade separates from a CRUD app: the
+Express layer is a thin caller (routes → controllers → services →
+repositories, and a repository's job for a multi-table write is `CALL sp_x`,
+never a hand-rolled sequence of INSERTs). Every view, procedure and trigger
+below exists because it protects an invariant or serves a query shape that
+would otherwise be reimplemented — and drift — across multiple call sites.
+
+### 9.1 Views (`0007_views.sql`)
+
+| View                            | Purpose                                                                                                                                                                                                                                                            | Invariant it protects / query it serves                                                                                                                                                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `v_group_card`                  | The shape `GET /api/groups`, browse cards, and every group-summary UI element read. One row per group with the game title/cover, owner display name, region code, a `GROUP_CONCAT`'d platform list, and `open_slots` computed once (`max_members - member_count`). | Nobody recomputes "open slots" differently in two places.                                                                                                                                                                                                                                                        |
+| `v_user_profile_full`           | The shape `GET /api/auth/me` and `GET /api/profile/:name` read: one profile row with region/language names resolved and platform/tag lists collapsed.                                                                                                              | The `is_primary` lookup rule (§9.3) is expressed once, here, not reimplemented per caller.                                                                                                                                                                                                                       |
+| `v_user_availability_minutes`   | A named, documented pass-through over `availability_slot` for the matchmaking overlap arithmetic.                                                                                                                                                                  | Exists so AGENT 07's query depends on a stable, documented surface rather than the base table directly.                                                                                                                                                                                                          |
+| `v_group_activity`              | `messages_7d`, `joins_7d` and a computed `activity_score` (messages weighted 2×, since a message is a stronger "real people are here" signal than a join) for the +3 recency component of the match score.                                                         | Windowed at query time (`NOW() - INTERVAL 7 DAY`), not materialized — a materialized version would need its own daily-refresh trigger for a number nothing else depends on being exact to the second.                                                                                                            |
+| `v_member_count_reconciliation` | `stored_member_count`, `actual_member_count`, and `drift` per group.                                                                                                                                                                                               | **The honesty check on the one deliberate denormalization in this schema** (§6). `drift` must be zero for every row, always — the admin data-health panel (AGENT 14) renders this view directly, and the AGENT 15 fuzz test asserts `WHERE drift <> 0` returns empty after 100 randomized membership operations. |
+| `v_game_popularity`             | `active_group_count` and `searching_user_count` per multiplayer game, powering the onboarding "popular games" picker and a trending panel.                                                                                                                         | Filters to `is_multiplayer = 1` once, so a caller can never accidentally surface a single-player game as a trending multiplayer pick.                                                                                                                                                                            |
+
+### 9.2 Stored procedures (`0008_procedures.sql`)
+
+Every procedure declares `DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN
+ROLLBACK; RESIGNAL; END;` immediately after its variable declarations. An
+**unexpected** SQL error (a constraint violation, a deadlock) rolls back
+everything the procedure had done and re-raises the original error unchanged
+— partial writes are structurally impossible, not just avoided by
+convention. An **expected, handled** outcome (a group being full, a user
+already a member) is communicated through an `OUT` parameter after a normal
+`COMMIT`, because refusing a join is a _successful_ call that correctly made
+no change, not a database error.
+
+| Procedure                  | Purpose                                                                                                                                                                                                                                           | Invariant                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `sp_create_group`          | Insert `lfg_group`, its `group_platform` rows (via `JSON_TABLE` over a CSV, set-based rather than a loop), and the owner's `group_member` row as one transaction.                                                                                 | Partial group creation is impossible — every other procedure and query assumes a group's owner is always also its first member. Proven: passing an out-of-domain platform id rolls back the `lfg_group` row too (§9.4).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `sp_join_group`            | Locks the group row, checks every hard requirement, and either inserts the membership or returns a refusal code.                                                                                                                                  | **The race-condition procedure** — see §9.5. Codes: `FULL`, `REQUIREMENT_MIC`, `REQUIREMENT_AGE`, `REQUIREMENT_RANK`, `ALREADY_MEMBER`, `REMOVED_PREVIOUSLY`, `NEEDS_REQUEST`, `NOT_FOUND`, `JOINED`. `REQUIREMENT_MIC` is a deliberate addition beyond the master prompt's literal six-code list: the task's own sentence names mic as a hard requirement to check, and the six required codes (`FULL`, `REQUIREMENT_AGE`, `REQUIREMENT_RANK`, `ALREADY_MEMBER`, `REMOVED_PREVIOUSLY`, `NEEDS_REQUEST`) are all still present and used exactly as specified. An **unranked** user (no `user_game` row, or `rank_tier IS NULL`) is never excluded by the rank check — the same rule AGENT 07 applies to the match score, for the same reason: excluding a beginner for not having ranked yet would be the product working against itself. |
+| `sp_decide_join_request`   | Authorizes the decider (must be an active owner/moderator), updates `join_request`, and on approval inserts the member — one transaction, with a capacity re-check under lock (the group could have filled between the request and the decision). | An approval can never be recorded without the member actually being added, and a race between two moderators deciding the same request resolves to exactly one outcome.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `sp_leave_group`           | Sets `state='left'`; if the leaver was the owner, promotes the longest-tenured active moderator, else the longest-tenured active member, else archives the group.                                                                                 | **A group must never end up with zero owners while it still has active members.** Proven for all three branches: a moderator present, only plain members present, and the leaver being the sole member (§9.6).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `sp_record_session_played` | Marks a session `played`, bumps `lfg_group.last_activity_at`, and returns the eligible rater/ratee pairs as a result set.                                                                                                                         | Does **not** pre-insert empty `rating` rows — `rating.score` is `NOT NULL`, so there is no valid "open, unscored" row this schema can represent (inventing one would be R3-violating placeholder data). Instead it flips the session to `played`, which `trg_rating_bi` (§9.3) requires before accepting any rating for that session — that state flip _is_ what "opens" the rating window.                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `sp_set_primary_game`      | Demotes any existing primary game for a user, then promotes the requested one — one transaction, both-or-neither.                                                                                                                                 | **Not one of the five procedures the master prompt names.** It exists because `trg_user_game_bi`/`bu`, as literally specified, are impossible in MySQL — see §9.3's note.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+### 9.3 Triggers (`0009_triggers.sql`)
+
+| Trigger                               | Fires on                                   | Purpose                                                                                                                                                                 | Invariant                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `trg_group_member_ai` / `_au` / `_ad` | INSERT / UPDATE / DELETE on `group_member` | The **only** writers of `lfg_group.member_count`; also flip `status` between `recruiting` and `full` at capacity.                                                       | The other half of the deliberate `member_count` denormalization (§6) — this is what keeps the redundant column honest, for every writer, forever. Application code writing `member_count` directly is a defect (anti-pattern C3) precisely because these triggers already do it correctly. The status flip is deliberately narrow: it only ever moves a group between `recruiting` and `full`, never touching `active` or `archived`. |
+| `trg_message_ai`                      | INSERT on `message`                        | Bumps `lfg_group.last_activity_at`.                                                                                                                                     | The data source for the +3 "recent activity" match-score component (§5.4) and the browse sort's tiebreaker — must be written by every message, from any future endpoint, without that endpoint needing to remember.                                                                                                                                                                                                                   |
+| `trg_user_bu`                         | BEFORE UPDATE on `user`                    | Writes an `audit_log` row when `status` changes.                                                                                                                        | Fires only on an actual status change (not every unrelated update), so the log stays a real trail, not noise. `actor_user_id` is `NULL` — a trigger has no notion of "who is making this HTTP request"; recording `NULL` is honest, guessing would not be.                                                                                                                                                                            |
+| `trg_profile_bu`                      | BEFORE UPDATE on `profile`                 | Writes an `audit_log` row when `display_name` changes.                                                                                                                  | Same reasoning as `trg_user_bu`, for the account attribute an impersonation investigation would need history for.                                                                                                                                                                                                                                                                                                                     |
+| `trg_rating_bi`                       | BEFORE INSERT on `rating`                  | Rejects a rating (`SIGNAL SQLSTATE '45000'`) unless (a) the session is `state = 'played'` **and** (b) both rater and ratee were active members of that session's group. | **The single source of rating eligibility** (AGENT 06 delegates this check here rather than reimplementing it in the route). Condition (a) is a deliberate addition beyond the task's literal sentence — without it, a rating could exist for a session that has not happened yet. Neither condition is expressible as a `CHECK` constraint, because both require reading other tables.                                               |
+
+**`trg_user_game_bi` / `trg_user_game_bu` do not exist.** The master prompt
+names them: "enforce at most one `is_primary = 1` per user by demoting the
+previous primary." This is impossible to implement literally — confirmed
+empirically, not assumed:
+
+```
+ERROR 1442 (HY000): Can't update table 'user_game' in stored function/trigger
+because it is already used by statement which invoked this stored
+function/trigger.
+```
+
+MySQL categorically forbids a trigger from issuing `UPDATE`/`DELETE` against
+the _same table_ its firing statement is already writing to, even for a
+different row, and even for a plain single-row `INSERT` with no `ON
+DUPLICATE KEY UPDATE` involved. There is no `BEFORE`/`AFTER` timing trick
+around it.
+
+The invariant is enforced **structurally** instead, which is arguably
+stronger than a trigger would have been: `user_game.primary_owner_id`
+mirrors `user_id` exactly when `is_primary = 1` and is `NULL` otherwise, and
+`uq_user_game_one_primary_per_user` — a `UNIQUE` index on that column — makes
+a second `is_primary = 1` row for the same user structurally impossible for
+_every_ writer: a stored procedure, a future endpoint, a raw SQL statement in
+a bug, not just the ones that remembered to call a trigger-equivalent helper.
+
+It is a **plain** column, not a `GENERATED ALWAYS AS (...) STORED` one, for a
+second, independently confirmed MySQL limitation: adding a `UNIQUE` index
+over a generated `STORED` column to a table with two or more foreign keys
+fails with a misleading `ERROR 1215 (HY000): Cannot add foreign key
+constraint`, reproduced on a throwaway table with the identical FK shape as
+`user_game` (FKs to `user` and `game`), regardless of statement order or
+`foreign_key_checks`. `user_game` has exactly two FKs, so the generated-column
+form is unavailable here. A plain column gives the identical guarantee via
+the index; the only difference is that something has to _write_ it —
+`sp_set_primary_game` (§9.2), the one sanctioned way to change a user's
+primary game.
+
+### 9.4 Indexes (`0010_indexes_initial.sql`)
+
+All seven indexes this agent's task list names **already existed**, created
+ahead of time in AGENT 01 (0003–0005) while designing the schema around the
+access patterns these features would need. `0010` does not duplicate them —
+doing so would create a genuine redundant index (the optimizer would never
+choose it over the original, and it would cost every future write a second
+index-maintenance operation for zero read benefit — precisely the class of
+defect AGENT 16 is tasked with finding and removing). Instead `0010`
+documents the reconciliation, and `verify_objects.js` checks column coverage
+against the real index names rather than requiring an exact name match:
+
+| Requested                                                      | Real index (exact match unless noted)                                | Serves                                                           |
+| -------------------------------------------------------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------- |
+| `idx_group_recruit(game_id,status,region_id,last_activity_at)` | `idx_lfg_group_recruit`                                              | The browse/matchmaking filter.                                   |
+| `idx_group_owner(owner_user_id)`                               | `idx_lfg_group_owner`                                                | "Groups I own"; the 10-recruiting-groups cap.                    |
+| `idx_member_user_state(user_id,state)`                         | `idx_group_member_user_state`                                        | `GET /api/me/groups`.                                            |
+| `idx_user_game_game(game_id,rank_tier)`                        | `idx_user_game_game_rank`                                            | Candidates + rank-window checks in `sp_join_group`.              |
+| `idx_avail_user_day(user_id,day_of_week)`                      | `idx_availability_slot_user_day` — **superset**, adds `start_minute` | Covering for the availability-overlap join's ordering.           |
+| `idx_message_group_time(group_id,created_at)`                  | `idx_message_group_time` — **superset**, adds `message_id`           | Backwards keyset message paging resolvable from the index alone. |
+| `idx_join_request_group_state(group_id,state)`                 | `idx_join_request_group_state`                                       | The owner's pending-request queue.                               |
+
+### 9.5 Transaction isolation, and why `sp_join_group` still needs `FOR UPDATE`
+
+The connection pool (`server/src/db/pool.ts`) and every procedure here run
+under MySQL's default isolation level, **REPEATABLE READ**, left at the
+default deliberately rather than weakened for throughput. Under REPEATABLE
+READ, a plain `SELECT` inside a transaction returns a consistent snapshot
+taken at the start of that transaction — reads are repeatable, which is
+exactly the guarantee most of this schema's read paths want.
+
+It is _not_, on its own, enough to make `sp_join_group`'s capacity check
+correct. Consider two users joining the last slot of a 5/5-capacity group at
+the same instant, with a naive `SELECT member_count ... ` (no lock):
+
+1. Both transactions begin and each takes its own REPEATABLE READ snapshot.
+2. Both read `member_count = 4`, `max_members = 5` — room for one more.
+3. Both conclude the join is allowed and both `INSERT`.
+4. Both commit. `member_count` becomes 6 (or the group silently has 6
+   members before the trigger even runs) — a **check-then-act race**
+   (anti-pattern C4). Snapshot consistency did not prevent this: each
+   transaction's snapshot was individually consistent and _still_ wrong once
+   both committed.
+
+`SELECT max_members, member_count, ... FROM lfg_group WHERE group_id = ? FOR
+UPDATE` changes this by taking an **exclusive row lock**, not a snapshot
+read. The second transaction's `FOR UPDATE` blocks — it does not proceed
+past that `SELECT` at all — until the first transaction commits or rolls
+back. Once unblocked, it reads the row **as it now exists**, post-commit,
+not the snapshot from when its own transaction began. This is what makes the
+capacity check see the true, current `member_count` rather than a stale one,
+and it is why exactly one of eight concurrent `sp_join_group` calls for a
+single open slot succeeds (proven in APPENDIX A-03, not merely asserted:
+three repeated runs, each producing exactly 1 `JOINED` and 7 `FULL`).
+
+The same reasoning is why `sp_leave_group` locks the group row before
+deciding succession (a concurrent leave and join must not interleave into an
+inconsistent owner state), and why `sp_decide_join_request` re-locks and
+re-checks capacity before approving — the group could have filled in the
+time between the request being made and a moderator deciding it.
+
+`SELECT ... FOR UPDATE` is therefore not a performance tax paid out of
+caution; it is the specific mechanism that makes REPEATABLE READ's snapshot
+isolation compatible with a check-then-act decision at all. A procedure that
+reads a value with a plain `SELECT` and later writes based on it is not
+safe under any transaction isolation level up to (and, for some write
+patterns, including) REPEATABLE READ without an explicit lock — this is the
+concrete illustration of that principle the codebase actually needed.

@@ -1,0 +1,73 @@
+-- =============================================================================
+-- 0010_indexes_initial.sql
+--
+-- Task 4 of this agent asks for seven named indexes serving the known query
+-- shapes. Every one of them ALREADY EXISTS: AGENT 01 (0003/0004/0005)
+-- anticipated these exact access patterns while designing the schema and
+-- created the indexes there, with the query they serve documented inline in
+-- each migration's comments.
+--
+-- This migration deliberately does NOT re-create them under new names.
+-- Doing so would produce a genuine duplicate — a second index over the same
+-- (or a prefix of the same) columns, which the optimizer would simply never
+-- choose over the original, existing only to cost every future INSERT and
+-- UPDATE a second index maintenance write for zero read benefit. That is
+-- exactly the class of defect AGENT 16 is tasked with finding and removing
+-- ("Remove any index that the measurements show is unused... unused indexes
+-- cost write throughput") — creating one on purpose here would be handing
+-- that agent a problem this one could have avoided.
+--
+-- What follows is the reconciliation: each requested index, the real index
+-- that already satisfies it, and the query it serves. This is the
+-- authoritative mapping cited in docs/schema.md's DATABASE PROGRAMMING
+-- section and read by db/scripts/verify_objects.js.
+--
+--   requested                                      -> actual (same or superset columns)
+--   idx_group_recruit(game_id,status,region_id,
+--     last_activity_at)                            -> idx_lfg_group_recruit
+--     (game_id,status,region_id,last_activity_at)   -- exact match.
+--     Serves: the browse/matchmaking filter (WHERE game_id=? AND status=?
+--     AND region_id=? ORDER BY last_activity_at).
+--
+--   idx_group_owner(owner_user_id)                 -> idx_lfg_group_owner
+--     (owner_user_id)                               -- exact match.
+--     Serves: "groups I own" (WHERE owner_user_id=?) and sp_create_group's
+--     implicit cap-check candidate (AGENT 06 task 1: a user may not own more
+--     than 10 recruiting groups).
+--
+--   idx_member_user_state(user_id,state)           -> idx_group_member_user_state
+--     (user_id,state)                               -- exact match.
+--     Serves: GET /api/me/groups (WHERE user_id=? AND state='active').
+--
+--   idx_user_game_game(game_id,rank_tier)          -> idx_user_game_game_rank
+--     (game_id,rank_tier)                           -- exact match.
+--     Serves: GET /api/groups/:id/candidates, the rank-window filter in
+--     sp_join_group's REQUIREMENT_RANK check, and the matchmaking query's
+--     per-game rank lookup.
+--
+--   idx_avail_user_day(user_id,day_of_week)        -> idx_availability_slot_user_day
+--     (user_id,day_of_week,start_minute)            -- superset: the extra
+--     start_minute column makes the index COVERING for the overlap query's
+--     ORDER BY, which a plain (user_id,day_of_week) index would not be.
+--     Serves: the availability-overlap join at the heart of the match score.
+--
+--   idx_message_group_time(group_id,created_at)    -> idx_message_group_time
+--     (group_id,created_at,message_id)              -- same name, superset:
+--     the extra message_id makes backwards keyset pagination
+--     (WHERE group_id=? AND (created_at,message_id) < (?,?)) resolvable
+--     from the index alone, which (group_id,created_at) could not do when
+--     two messages land in the same millisecond.
+--     Serves: backwards keyset message paging (AGENT 08).
+--
+--   idx_join_request_group_state(group_id,state)   -> idx_join_request_group_state
+--     (group_id,state)                              -- exact match.
+--     Serves: the owner's pending-join-request queue
+--     (WHERE group_id=? AND state='pending'), and sp_decide_join_request's
+--     authorization lookup.
+--
+-- No DDL runs in this file. It exists so migration numbering stays
+-- sequential and so this reconciliation has a permanent, versioned home next
+-- to the schema it describes, rather than living only in a doc that could
+-- drift from the code.
+-- =============================================================================
+SELECT 'AGENT 03 indexes: all seven requested indexes already exist from AGENT 01 — see the header comment in this file for the name mapping.' AS note;
