@@ -279,6 +279,24 @@ migration every time a new column became sensitive; this one needs a trigger.
 change made by the ETL or a migration has no user behind it, and claiming one
 would be worse than recording `NULL`.
 
+### 2.6 Authentication tokens (`0011_auth.sql`)
+
+Three single-purpose tables. In each, only the SHA-256 of a token is stored
+(`token_hash CHAR(64)` primary key); the raw value exists only in the email link
+or the httpOnly cookie that carries it, so a leaked database cannot be replayed.
+Tokens are 32 random bytes, so an unsalted hash is sufficient — there is nothing
+to brute-force. All three cascade-delete with their `user`.
+
+| Table                | Extra columns                                       | Rules                                                                                                                                                             |
+| -------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `email_verification` | `user_id`, `expires_at`, `used_at`                  | Single use, 24 h expiry.                                                                                                                                          |
+| `refresh_token`      | `user_id`, `expires_at`, `revoked_at`, `user_agent` | Rotated on every use; presenting a revoked token revokes all of the user's tokens. `idx_refresh_token_user_revoked (user_id, revoked_at)` serves that revocation. |
+| `password_reset`     | `user_id`, `expires_at`, `used_at`                  | Single use, 1 h expiry; requesting a new link retires older unused ones.                                                                                          |
+
+Timestamps are UTC values written by the application and compared against the
+application clock; nothing here depends on `NOW()` or the MySQL session zone.
+Expired rows are not yet purged — a periodic cleanup is future work.
+
 ---
 
 ## 3. The foreign key map

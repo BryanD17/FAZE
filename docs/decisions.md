@@ -179,3 +179,77 @@ learned model would be a worse product here (cold start, no training data, no
 explanation for the user) and would replace the graded database work with a
 different subject's work. Scope discipline is itself a graded behavior in a
 semester project.
+
+---
+
+## 2026-09-29 — Refresh tokens are opaque random values, not JWTs
+
+**Decision:** The access token is a 15-minute HS256 JWT; the refresh token is 32
+random bytes (base64url) stored only as its SHA-256 in `refresh_token`.
+
+A JWT refresh token would be verifiable without a database read, but a refresh
+token exists specifically so the server can say "no" — to a stolen copy, a
+suspended account, a logged-out session. That needs a row to revoke, so the
+statelessness would buy nothing and the signature would add a second thing to
+get wrong. The access token is the opposite: it is checked on every request and
+must not need a lookup, which is why it is a short-lived JWT and why a
+suspension takes effect at the next refresh (≤ 15 minutes), not instantly.
+`JWT_REFRESH_SECRET` in `.env.example` is therefore reserved and unused.
+
+## 2026-09-29 — Rotate on every refresh; a replayed token ends every session
+
+**Decision:** `POST /api/auth/refresh` revokes the presented token and issues a
+new one. Presenting an already-revoked token revokes **all** of that user's live
+refresh tokens and answers 401 `REFRESH_TOKEN_REUSED`.
+
+A revoked token showing up again means either a stolen copy is being replayed or
+the legitimate client raced itself; the server cannot tell which, and guessing
+wrong in the lenient direction leaves a thief with a live session. Ending every
+session is the safe answer and the cost (one re-login) is small. The check-then-
+spend decision runs under `SELECT … FOR UPDATE`, the same mechanism that closes
+the last-slot race in `sp_join_group`, so two simultaneous refreshes of one token
+resolve to exactly one winner (tested). The revocation is decided _inside_ the
+transaction and the error is thrown _after_ it commits — throwing from inside
+would roll the revocation back and defeat the point.
+
+## 2026-09-29 — Sign-in rate limit counts failures only
+
+**Decision:** 5 attempts / 15 min / IP on register and the two reset endpoints
+(every request counts); on sign-in only **failed** attempts count.
+
+The threat on sign-in is password guessing, and failures are what that produces.
+Counting successes as well punishes shared addresses — a classroom, a campus, or
+the single proxy IP in front of a hosted demo — for their own legitimate logins,
+which would lock the team out of its own demo. Registration and reset are the
+mass-signup and email-flooding vectors, so every request counts there. Behind a
+proxy, `trust proxy` must be configured (AGENT 19) or every visitor shares one
+counter.
+
+## 2026-09-29 — Account status is checked after the secret is proven
+
+**Decision:** Sign-in verifies the password first and only then reports
+`ACCOUNT_SUSPENDED` / `EMAIL_NOT_VERIFIED` / `ACCOUNT_DELETED`.
+
+Checking status first would let anyone learn which accounts are suspended by
+submitting a wrong password and reading the error. Unknown email and wrong
+password return byte-identical 401s, and an unknown email still performs a full
+argon2id verification against a precomputed dummy hash so response time does not
+distinguish them either. Password reset answers 202 with an identical body for
+known and unknown addresses. One residual difference is accepted: a real
+address does extra database work and sends a message, so a patient attacker
+timing that endpoint could infer existence; closing it would mean queueing the
+work, which is not worth the complexity for this product.
+
+## 2026-09-29 — Email goes through a `Mailer` interface; no provider is chosen yet
+
+**Decision:** The application calls `Mailer.sendVerification / sendPasswordReset`.
+There is no vendor implementation.
+
+Picking SES, Resend or SendGrid needs an account and a verified sending domain —
+an owner decision, not something to invent. Until then: in development the link
+is printed to the server output (the one sanctioned place a token appears in
+output, gated on `NODE_ENV=development`, because without a mail provider that
+link is the only way to finish verification); in test a capturing mailer is
+injected; in production nothing is sent and a warning says so _without_ the link.
+`ALLOW_UNVERIFIED_LOGIN=true` activates accounts at registration for local
+development, and the server refuses to boot with it set in production.
