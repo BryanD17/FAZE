@@ -28,6 +28,29 @@ const envSchema = z.object({
   DB_PASSWORD: z.string().default('root'),
   DB_NAME: z.string().min(1).default('faze'),
   DB_NAME_TEST: z.string().min(1).default('faze_test'),
+
+  // Signs the 15-minute access token. Required, and long enough that it cannot
+  // be guessed: a short secret would let anyone forge a token for any user.
+  JWT_ACCESS_SECRET: z
+    .string()
+    .min(32, 'must be at least 32 characters (openssl rand -base64 48)')
+    // .env.example ships a placeholder long enough to pass the length check.
+    // Booting with it would mean signing tokens with a secret that is public.
+    .refine(
+      (v) => !v.startsWith('replace-me'),
+      'is still the .env.example placeholder; generate a real one',
+    ),
+
+  // Development shortcut: activate accounts at registration instead of waiting
+  // for an emailed link. Refused at boot in production (see below).
+  ALLOW_UNVERIFIED_LOGIN: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+
+  // The refresh cookie is `Secure`. Browsers accept that on http://localhost
+  // (Chrome, Edge, Firefox) but Safari does not; set false to develop in Safari.
+  COOKIE_SECURE: z.enum(['true', 'false']).optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -37,6 +60,11 @@ if (!parsed.success) {
 }
 
 const env = parsed.data;
+
+// A verification bypass must be impossible to enable by accident in production.
+if (env.NODE_ENV === 'production' && env.ALLOW_UNVERIFIED_LOGIN) {
+  throw new Error('ALLOW_UNVERIFIED_LOGIN=true is not permitted when NODE_ENV=production.');
+}
 
 export const config = {
   env: env.NODE_ENV,
@@ -53,5 +81,14 @@ export const config = {
     // Tests run against a separate database so a `db:reset` can never wipe
     // someone's development data mid-suite.
     database: env.NODE_ENV === 'test' ? env.DB_NAME_TEST : env.DB_NAME,
+  },
+  auth: {
+    accessSecret: env.JWT_ACCESS_SECRET,
+    accessTtlSeconds: 15 * 60,
+    refreshTtlSeconds: 30 * 24 * 60 * 60,
+    verificationTtlSeconds: 24 * 60 * 60,
+    passwordResetTtlSeconds: 60 * 60,
+    allowUnverifiedLogin: env.ALLOW_UNVERIFIED_LOGIN,
+    cookieSecure: env.COOKIE_SECURE ? env.COOKIE_SECURE === 'true' : true,
   },
 } as const;
