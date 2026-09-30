@@ -8,6 +8,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import pinoHttp from 'pino-http';
+
 import { config } from './config.js';
 import { createAuthController } from './controllers/auth.controller.js';
 import { logger } from './logger.js';
@@ -15,7 +16,9 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { createAuthRateLimiters } from './middleware/rateLimit.js';
 import type { AuthRateLimits } from './middleware/rateLimit.js';
 import { createAuthRouter } from './routes/auth.js';
+import { gamesRouter } from './routes/games.js';
 import { healthRouter } from './routes/health.js';
+import { profileRouter } from './routes/profile.js';
 import { createAuthService } from './services/auth.service.js';
 import { createDefaultMailer } from './services/mailer.js';
 import type { Mailer } from './services/mailer.js';
@@ -31,15 +34,14 @@ export function createApp(opts: AppOptions = {}) {
   const app = express();
 
   app.use(helmet());
+
   app.use(
     cors({
       origin: config.clientOrigin,
-      // The refresh token travels in an httpOnly cookie, so the browser must
-      // be allowed to send credentials cross-origin.
       credentials: true,
     }),
   );
-  // A body limit is a denial-of-service control, not a formality.
+
   app.use(express.json({ limit: '100kb' }));
   app.use(cookieParser());
   app.use(pinoHttp({ logger }));
@@ -51,12 +53,17 @@ export function createApp(opts: AppOptions = {}) {
   });
 
   app.use('/api', healthRouter);
+
   app.use(
     '/api/auth',
     createAuthRouter(createAuthController(authService), createAuthRateLimiters(opts.rateLimits)),
   );
 
+  app.use('/api/profile', profileRouter);
+  app.use('/api/games', gamesRouter);
+
   app.use(notFound);
   app.use(errorHandler);
+
   return app;
 }
