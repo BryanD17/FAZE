@@ -144,3 +144,12 @@ curl localhost:4000/api/auth/me -H "authorization: Bearer $ACCESS"
   and forward a rejected promise to the error middleware.
 - Throw `AppError(code, status, message, field?)` for an expected failure; never
   `res.status(500).json({ error: e.message })`.
+
+### `GET /api/profile/:displayName`
+
+Public profiles never return the account email or exact birth year. Birth year
+is reduced to an age bracket.
+
+Exact availability is returned only to the profile owner or to users who share
+an active group with that profile. Other viewers receive only a coarse summary
+such as `evenings` or `weekends`.
