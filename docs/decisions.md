@@ -253,3 +253,28 @@ link is the only way to finish verification); in test a capturing mailer is
 injected; in production nothing is sent and a warning says so _without_ the link.
 `ALLOW_UNVERIFIED_LOGIN=true` activates accounts at registration for local
 development, and the server refuses to boot with it set in production.
+
+## 2026-10-02 — Scope cut: a smaller project that is easier to demo
+
+**Decision:** We keep the main flow (register, profile, browse and match groups,
+join, chat) and cut everything that only adds size. The full list is in
+`docs/SCOPE.md`, which replaces the work-package list in
+`FAZE_Master_Prompt_V1.txt` wherever the two disagree.
+
+Why: this is a database class project. The graded parts are the schema, the SQL,
+transactions and performance evidence, and they were being crowded out by
+features nobody will grade. Working code that was already built (email
+verification, password reset, token rotation, completeness scoring, extra
+procedures and triggers) is **frozen, not deleted**: removing it would cost time
+and risk breakage for no benefit.
+
+Consequences, all deliberate:
+
+- Email verification is off. Accounts are active on sign-up
+  (`ALLOW_UNVERIFIED_LOGIN=true`). This supersedes the 2026-09-29 `Mailer` entry
+  where it said the server refuses that setting in production: it now boots in
+  production only when `DEMO_MODE=true` is also set, so skipping verification is
+  always a visible, deliberate choice.
+- No new tables, procedures, triggers or views. No more decision records.
+- Chat refreshes by polling; there are no live sockets.
+- Matching is one SQL score: 50 same game + 20 same region + up to 30 availability.

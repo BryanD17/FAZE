@@ -11,6 +11,31 @@
         MASTER PROMPT V1 — FULL BUILD + PHASE 1 & PHASE 2 DELIVERY
 ================================================================================
 
+================================================================================
+ SCOPE REDUCTION — 2 OCT 2026 — READ THIS BEFORE ANYTHING BELOW
+================================================================================
+ This document describes the ORIGINAL, much larger plan. After Alvin's review
+ the team agreed to build a smaller, easier-to-demo project. The current plan is
+ docs/SCOPE.md, with one step-by-step page per person in docs/team/.
+
+   >>> Where this file and docs/SCOPE.md disagree, docs/SCOPE.md WINS. <<<
+
+ What changes for the sections below:
+   - Agents 00-05 are DONE. Their code stays; features marked "frozen" in
+     SCOPE.md (email verification, password reset, refresh rotation, profile
+     completeness) are built but are not extended and not demoed.
+   - Agents 06-20 are REDUCED to the small versions in docs/team/*.md.
+     Agent 09 (OpenAPI / enterprise API contract) is CUT; docs/api.md is kept
+     up to date by hand instead.
+   - Section 1.8 (evidence) still applies in spirit but is relaxed: 2-4 lines
+     of REAL pasted output in the pull request are enough. A full "Appendix A"
+     entry is no longer required for agents 05 onward.
+   - No new tables, procedures, triggers or views, and no new decision records.
+   - Email verification is off: ALLOW_UNVERIFIED_LOGIN=true (a production
+     deployment also needs DEMO_MODE=true).
+================================================================================
+
+
 DOCUMENT NAME : FAZE_Master_Prompt_V1.txt
 VERSION       : V1 (first master document for this repo — no predecessor)
 REPO          : https://github.com/BryanD17/FAZE.git
@@ -286,30 +311,34 @@ SECTION 2 — PROGRESS LEDGER
 
 Status markers:  ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
 
-  PHASE 1 SCOPE (must all be ✅ before Oct 19, 11:59pm)
+  (Re-scoped 2026-10-02 — see docs/SCOPE.md. "REDUCED" = the small version in
+  docs/team/<name>.md. "CUT" = no longer built.)
+
+  PHASE 1 SCOPE (due Oct 19, 11:59pm)
   ✅ AGENT 00 — REPO FOUNDATION & MONOREPO SCAFFOLD
   ✅ AGENT 01 — DATABASE DESIGN: ER MODEL, 3NF, CORE DDL, MIGRATION RUNNER
-  ✅ AGENT 02 — DATA ACQUISITION: KAGGLE SEED + API ENRICHMENT ETL
+         (the ER diagram PICTURE is still to be drawn — Bryan, docs/team/bryan.md)
+  ✅ AGENT 02 — DATA ACQUISITION: KAGGLE SEED + API ENRICHMENT ETL (RAWG: CUT)
   ✅ AGENT 03 — ADVANCED MySQL: VIEWS, PROCEDURES, TRIGGERS, TRANSACTIONS
-  ✅ AGENT 04 — AUTH: REGISTRATION, LOGIN, SESSIONS, PASSWORD SECURITY
-  ⬜ AGENT 05 — GAMER PROFILES: GAMES, PLATFORMS, REGIONS, PLAYSTYLE TAGS
-  ⬜ AGENT 06 — GROUPS & LFG POSTINGS: FULL CRUD + MEMBERSHIP LIFECYCLE
-  ⬜ AGENT 07 — MATCHMAKING ENGINE: THE RANKED SEARCH QUERY
-  ⬜ AGENT 08 — GROUP MESSAGING
-  ⬜ AGENT 09 — API CONTRACT: VALIDATION, ERRORS, PAGINATION, OPENAPI
-  ⬜ AGENT 10 — FRONTEND FOUNDATION: DESIGN SYSTEM, SHELL, ROUTING, API CLIENT
-  ⬜ AGENT 11 — FRONTEND: AUTH + ONBOARDING + PROFILE SCREENS
-  ⬜ AGENT 12 — FRONTEND: BROWSE, SEARCH, FILTERS, GROUP DETAIL, JOIN FLOW
-  ⬜ AGENT 13 — FRONTEND: MY GROUPS DASHBOARD + CHAT UI
-  ⬜ AGENT 14 — DEMO DATA REALISM + ADMIN/DB INSPECTION TOOLING
-  ⬜ AGENT 18 — PHASE 1 DELIVERABLES: ER DIAGRAM, REPORT, DISCUSSION, SUBMIT
+  ✅ AGENT 04 — AUTH (login/register/logout kept; verification, reset, rotation frozen)
+  ✅ AGENT 05 — GAMER PROFILES (Alvin, PR #11)
+  ⬜ AGENT 06 — GROUPS API: create, list, view, join, leave (REDUCED — Česko²)
+  ⬜ AGENT 07 — MATCHMAKING: one SQL score, GET /api/matches (REDUCED — Bryan)
+  ⬜ AGENT 08 — GROUP MESSAGES: list + post, polling (REDUCED — Alvin)
+  ✂  AGENT 09 — API CONTRACT / OPENAPI (CUT — docs/api.md is kept by hand)
+  ⬜ AGENT 10 — FRONTEND BASE on the shared client/ workspace (REDUCED — rita)
+  ⬜ AGENT 11 — FRONTEND: login, register, profile (REDUCED — rita)
+  ⬜ AGENT 12 — FRONTEND: groups, matches, group detail, join/leave (REDUCED — rita)
+  ⬜ AGENT 13 — FRONTEND: chat box on the group page (REDUCED — rita + Alvin)
+  ⬜ AGENT 14 — DEMO DATA ~40 users / 15 groups / 200 messages (REDUCED — Arman)
+  ⬜ AGENT 18 — PHASE 1 DELIVERABLES: ER diagram, normalisation, report (REDUCED — Bryan)
 
-  PHASE 2 SCOPE (must all be ✅ before Dec 7, 11:59pm)
-  ⬜ AGENT 15 — TEST SUITE: UNIT, INTEGRATION, SQL CORRECTNESS
-  ⬜ AGENT 16 — PERFORMANCE: EXPLAIN-PROVEN INDEXES, N+1 ELIMINATION
-  ⬜ AGENT 17 — SECURITY & INTEGRITY HARDENING
-  ⬜ AGENT 19 — DEPLOYMENT, SEEDED DEMO ENVIRONMENT, DEMO VIDEO
-  ⬜ AGENT 20 — FINAL VERIFICATION (the gate)
+  PHASE 2 SCOPE (due Dec 7, 11:59pm)
+  ⬜ AGENT 15 — TESTS: about 15 key tests (REDUCED — Arman)
+  ⬜ AGENT 16 — PERFORMANCE: EXPLAIN before/after for 3 queries (REDUCED — Bryan)
+  ⬜ AGENT 17 — SECURITY: one-page check (REDUCED — Česko²)
+  ⬜ AGENT 19 — ONE RUNNABLE DEMO ENVIRONMENT (REDUCED — Alvin)
+  ⬜ AGENT 20 — FINAL VERIFICATION: fresh clone follows the README (REDUCED — Bryan)
 
 --------------------------------------------------------------------------------
 LEDGER NOTES (append a dated line every time an agent closes)
@@ -394,6 +423,13 @@ LEDGER NOTES (append a dated line every time an agent closes)
       SendGrid, verify a sending domain, and implement the one Mailer class in
       server/src/services/mailer.ts. Until then a production deploy cannot
       complete email verification.
+  [2026-09-30] AGENT 05 ✅ — gamer profile API (profile, platforms, tags, game
+      library, availability stored in UTC) by Alvin Hoang, PR #11, merged to main.
+  [2026-10-02] SCOPE — The project was re-scoped to a smaller version after
+      Alvin's review. See docs/SCOPE.md (the plan) and docs/team/ (one page per
+      person). The mail-provider item above is OBSOLETE: email verification is
+      off (ALLOW_UNVERIFIED_LOGIN=true; production also needs DEMO_MODE=true).
+      Agents 06-20 are reduced; agent 09 is cut.
   [2026-09-17] NOTE — Work is being delivered on the branch
       claude/new-session-rui3z9 rather than one branch per agent, because the
       session's operating instructions designate that branch and forbid pushing

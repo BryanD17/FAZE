@@ -20,7 +20,7 @@ import { hashToken, newOpaqueToken, signAccessToken } from './tokens.js';
 
 export interface AuthServiceDeps {
   mailer: Mailer;
-  /** Development shortcut. Never true in production (config refuses to boot). */
+  /** Skip email verification. In production config also requires DEMO_MODE=true. */
   allowUnverifiedLogin: boolean;
   /** Injectable clock so expiry is testable without sleeping. */
   now?: () => Date;
@@ -52,7 +52,7 @@ function duplicateField(err: unknown): 'email' | 'displayName' | null {
 
 export function createAuthService(deps: AuthServiceDeps) {
   const clock = deps.now ?? (() => new Date());
-  const allowUnverified = deps.allowUnverifiedLogin && !config.isProduction;
+  const allowUnverified = deps.allowUnverifiedLogin;
 
   /** Why this account may not sign in, or null if it may. */
   function statusError(user: AuthUserRow): AppError | null {
