@@ -41,9 +41,16 @@ const envSchema = z.object({
       'is still the .env.example placeholder; generate a real one',
     ),
 
-  // Development shortcut: activate accounts at registration instead of waiting
-  // for an emailed link. Refused at boot in production (see below).
+  // Activate accounts at registration instead of waiting for an emailed link.
+  // The class project has no mail provider, so this is how people sign in.
+  // In production it additionally needs DEMO_MODE=true (see below).
   ALLOW_UNVERIFIED_LOGIN: z
+    .enum(['true', 'false'])
+    .default('false')
+    .transform((v) => v === 'true'),
+
+  // Explicit opt-in that lets a deployed demo skip email verification.
+  DEMO_MODE: z
     .enum(['true', 'false'])
     .default('false')
     .transform((v) => v === 'true'),
@@ -61,9 +68,11 @@ if (!parsed.success) {
 
 const env = parsed.data;
 
-// A verification bypass must be impossible to enable by accident in production.
-if (env.NODE_ENV === 'production' && env.ALLOW_UNVERIFIED_LOGIN) {
-  throw new Error('ALLOW_UNVERIFIED_LOGIN=true is not permitted when NODE_ENV=production.');
+// Skipping email verification in production must be a deliberate choice.
+if (env.NODE_ENV === 'production' && env.ALLOW_UNVERIFIED_LOGIN && !env.DEMO_MODE) {
+  throw new Error(
+    'ALLOW_UNVERIFIED_LOGIN=true in production also requires DEMO_MODE=true (a deliberate demo deployment).',
+  );
 }
 
 export const config = {

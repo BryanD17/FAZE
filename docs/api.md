@@ -1,11 +1,10 @@
 # API contract
 
-> **Status:** AGENT 09 will freeze the full contract, generate OpenAPI, and add the
-> standard error/pagination envelopes for every endpoint. Until then this file
-> documents the endpoints that exist, so the people building against them
-> (rita for the auth screens in AGENT 11, Alvin for profiles in AGENT 05) are not
-> guessing. Request/response shapes are the zod schemas in
-> `shared/src/schemas/auth.ts` — the client should import those, not retype them.
+> **Status:** this file documents the endpoints that exist so the people building
+> against them (rita for the screens, everyone for tests) are not guessing. We are
+> **not** generating OpenAPI or freezing an enterprise contract — see
+> `docs/SCOPE.md`. Request shapes are the zod schemas in `shared/src/schemas/` —
+> import those, do not retype them.
 
 Base URL in development: `http://localhost:4000`. The Vite dev server proxies
 `/api` to it, so the browser can call `/api/...` on its own origin.
@@ -153,3 +152,35 @@ is reduced to an age bracket.
 Exact availability is returned only to the profile owner or to users who share
 an active group with that profile. Other viewers receive only a coarse summary
 such as `evenings` or `weekends`.
+
+## Profile and games
+
+All `/api/profile/me…` routes need `Authorization: Bearer <token>`. Request
+shapes are the zod schemas in `shared/src/schemas/profile.ts` — import them, do
+not retype them. Unknown fields are rejected with `400 VALIDATION_ERROR`.
+
+| Method | Path                            | Body (shape)                                                                                                        | Purpose                                     |
+| ------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| GET    | `/api/profile/me`               | —                                                                                                                   | Your full profile                           |
+| PATCH  | `/api/profile/me`               | `profilePatchSchema`: any of `displayName, bio, avatarUrl, birthYear, regionId, languageId, timezone, micAvailable` | Edit basic fields                           |
+| PUT    | `/api/profile/me/platforms`     | `{ platformIds: number[] }` (max 20)                                                                                | Replace your platforms                      |
+| PUT    | `/api/profile/me/tags`          | `{ tagIds: number[] }` (max 5)                                                                                      | Replace your play-style tags                |
+| GET    | `/api/profile/me/games`         | —                                                                                                                   | Your game list                              |
+| POST   | `/api/profile/me/games`         | `{ gameId, selfRank?, rankTier?, hoursPlayed?, goal?, isPrimary? }`                                                 | Add a game                                  |
+| PATCH  | `/api/profile/me/games/:gameId` | any of the optional fields above                                                                                    | Edit a game entry                           |
+| DELETE | `/api/profile/me/games/:gameId` | —                                                                                                                   | Remove a game                               |
+| PUT    | `/api/profile/me/availability`  | array of `{ dayOfWeek 0–6, startLocal "HH:MM", endLocal "HH:MM" }` (max 50) in the profile's `timezone`             | Replace weekly availability (stored in UTC) |
+| GET    | `/api/profile/me/availability`  | —                                                                                                                   | Your availability                           |
+| GET    | `/api/profile/me/completeness`  | —                                                                                                                   | **Frozen** — do not use                     |
+| GET    | `/api/profile/:displayName`     | —                                                                                                                   | Someone's public profile                    |
+| GET    | `/api/games/search?q=…`         | query: `q` (required), `platform`, `multiplayerOnly`, `limit`                                                       | Search the game catalog                     |
+| GET    | `/api/games/popular`            | —                                                                                                                   | Most-owned games                            |
+
+`goal` is one of `casual, ranked, learning, completionist, content`.
+
+## Still to come (see `docs/SCOPE.md`)
+
+`GET /api/lookups` (Alvin), `GET /api/groups`, `POST /api/groups`,
+`GET /api/groups/:id`, `POST /api/groups/:id/join`, `POST /api/groups/:id/leave`
+(Česko²), `GET /api/matches` (Bryan), `GET` and `POST /api/groups/:id/messages`
+(Alvin). Each owner adds their own rows to this file when their PR lands.

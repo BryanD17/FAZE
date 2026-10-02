@@ -1,45 +1,24 @@
-## Agent
+## What I did
 
-<!-- e.g. AGENT 04 — AUTH. Put "n/a" for a follow-up fix or docs-only PR. -->
+<!-- Two or three plain sentences: what this adds and why. -->
 
-**Agent number:** AGENT \_\_
-**Branch:** `agent/agent-NN-<short-name>`
+## Which task is this?
 
-## What changed
+<!-- Your page in docs/team/ and the task number, e.g. "cesko2.md, Task 1". -->
 
-<!-- What a reviewer needs to know in three sentences. Not a file list —
-     git already has that. Why this change, and what it enables next. -->
+## Proof it works
 
-## Evidence per acceptance criterion
+<!-- Paste 2-4 lines of REAL output: the end of `npm test`, a curl reply, or a
+     screenshot. "It works" on its own is not proof. -->
 
-<!-- One entry per [ ] box in the agent, in order. Paste REAL output:
-     CLI output, SQL result sets, test summaries, file:line references, or a
-     described manual test naming what you clicked and what you saw.
-     "Looks fine" and "implemented and working" are not evidence (§1.8). -->
+## Checked before opening
 
-| #   | Criterion | Evidence |
-| --- | --------- | -------- |
-| 1   |           |          |
-| 2   |           |          |
-
-## Verification run locally
-
-- [ ] `npm run lint` and `npm run format:check` pass
-- [ ] `npm run typecheck` passes
-- [ ] `npm -w @faze/client run build` exits 0
+- [ ] `npm run lint` passes
+- [ ] `npm run format` was run
 - [ ] `npm test` passes
-- [ ] `npm run db:migrate` applies cleanly from an empty database
+- [ ] Only files needed for this task are changed, and no secrets (`.env`, keys)
+- [ ] Nothing outside the scope in `docs/SCOPE.md` was added
 
-## ⛔ Blocked items
+## Anything Bryan needs to do or know?
 
-<!-- Anything a human must do, the EXACT step, and who must do it.
-     "Bryan: create a Kaggle API token at kaggle.com/settings and save it to
-     ~/.kaggle/kaggle.json". Never silently pass; never invent a key. -->
-
-- [ ] None
-
-## Ledger
-
-- [ ] `FAZE_Master_Prompt_V1.txt` PROGRESS LEDGER updated
-- [ ] `LEDGER NOTES` has a dated line
-- [ ] `APPENDIX A-NN` filled in with the evidence above
+<!-- Optional. -->
