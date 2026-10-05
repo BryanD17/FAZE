@@ -41,6 +41,7 @@ the failure belongs to a single input, the `field` to highlight:
 | Method | Path                               | Auth               | Purpose                                          |
 | ------ | ---------------------------------- | ------------------ | ------------------------------------------------ |
 | GET    | `/api/health`                      | none               | `{ ok, db }` from a real `SELECT 1`              |
+| GET    | `/api/lookups`                     | none               | Reference lists for profile and group forms      |
 | POST   | `/api/auth/register`               | none, rate-limited | Create an account                                |
 | POST   | `/api/auth/verify-email`           | none               | Spend an emailed verification token              |
 | POST   | `/api/auth/login`                  | none, rate-limited | Email + password → session                       |
@@ -49,6 +50,19 @@ the failure belongs to a single input, the `field` to highlight:
 | GET    | `/api/auth/me`                     | Bearer             | The caller's own profile                         |
 | POST   | `/api/auth/request-password-reset` | none, rate-limited | Email a reset link (always 202)                  |
 | POST   | `/api/auth/reset-password`         | none, rate-limited | Spend a reset token, set a new password          |
+
+### `GET /api/lookups`
+
+Public endpoint used by profile and group forms. `200` returns:
+
+```json
+{
+  "regions": [{ "id": 1, "name": "North America East", "code": "NA-East" }],
+  "languages": [{ "id": 1, "name": "English", "code": "en" }],
+  "platforms": [{ "id": 1, "name": "PC" }],
+  "tags": [{ "id": 1, "name": "Competitive" }]
+}
+```
 
 ### `POST /api/auth/register`
 
@@ -180,7 +194,7 @@ not retype them. Unknown fields are rejected with `400 VALIDATION_ERROR`.
 
 ## Still to come (see `docs/SCOPE.md`)
 
-`GET /api/lookups` (Alvin), `GET /api/groups`, `POST /api/groups`,
-`GET /api/groups/:id`, `POST /api/groups/:id/join`, `POST /api/groups/:id/leave`
-(Česko²), `GET /api/matches` (Bryan), `GET` and `POST /api/groups/:id/messages`
-(Alvin). Each owner adds their own rows to this file when their PR lands.
+`GET /api/groups`, `POST /api/groups`, `GET /api/groups/:id`,
+`POST /api/groups/:id/join`, `POST /api/groups/:id/leave` (Česko²),
+`GET /api/matches` (Bryan), `GET` and `POST /api/groups/:id/messages` (Alvin).
+Each owner adds their own rows to this file when their PR lands.

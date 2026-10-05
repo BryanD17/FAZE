@@ -18,6 +18,7 @@ import type { AuthRateLimits } from './middleware/rateLimit.js';
 import { createAuthRouter } from './routes/auth.js';
 import { gamesRouter } from './routes/games.js';
 import { healthRouter } from './routes/health.js';
+import { lookupsRouter } from './routes/lookups.js';
 import { profileRouter } from './routes/profile.js';
 import { createAuthService } from './services/auth.service.js';
 import { createDefaultMailer } from './services/mailer.js';
@@ -59,6 +60,7 @@ export function createApp(opts: AppOptions = {}) {
     createAuthRouter(createAuthController(authService), createAuthRateLimiters(opts.rateLimits)),
   );
 
+  app.use('/api/lookups', lookupsRouter);
   app.use('/api/profile', profileRouter);
   app.use('/api/games', gamesRouter);
 
