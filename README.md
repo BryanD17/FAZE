@@ -50,7 +50,7 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Profiles: region, platform, games, tags, availability                                                     | ✅ Done (Alvin) |
 | Groups API: create, list, view, join, leave                                                               | ⬜ Česko²       |
 | Match query and `GET /api/matches`                                                                        | ⬜ Bryan        |
-| Group messages API                                                                                        | ⬜ Alvin        |
+| Group messages API                                                                                        | ✅ Alvin        |
 | Screens: login, profile, groups, matches, group detail                                                    | ⬜ rita         |
 | Demo data and tests                                                                                       | ⬜ Arman        |
 | ER diagram, report, performance evidence                                                                  | ⬜ Bryan        |
