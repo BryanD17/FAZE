@@ -750,6 +750,12 @@ against the real index names rather than requiring an exact name match:
 | `idx_message_group_time(group_id,created_at)`                  | `idx_message_group_time` — **superset**, adds `message_id`           | Backwards keyset message paging resolvable from the index alone. |
 | `idx_join_request_group_state(group_id,state)`                 | `idx_join_request_group_state`                                       | The owner's pending-request queue.                               |
 
+One index was added after the initial set: migration `0012` adds
+`idx_availability_slot_day_time (day_of_week, start_minute, end_minute, user_id)`
+for the match query's availability-overlap step. It cut that step from 160 ms to
+45 ms and the whole query from 295 ms to 164 ms on 20,000 users and 5,000
+groups; the `EXPLAIN` evidence is in [`performance.md`](performance.md).
+
 ### 9.5 Transaction isolation, and why `sp_join_group` still needs `FOR UPDATE`
 
 The connection pool (`server/src/db/pool.ts`) and every procedure here run

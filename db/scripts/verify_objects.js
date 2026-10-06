@@ -81,6 +81,11 @@ const EXPECTED_INDEX_COVERAGE = [
     serves: 'availability overlap join',
   },
   {
+    table: 'availability_slot',
+    columns: ['day_of_week', 'start_minute', 'end_minute'],
+    serves: 'match query: other slots on the same day (0012)',
+  },
+  {
     table: 'message',
     columns: ['group_id', 'created_at'],
     serves: 'backwards keyset message paging',
