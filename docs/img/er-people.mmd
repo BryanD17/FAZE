@@ -1,0 +1,49 @@
+erDiagram
+    user ||--|| profile : "has one"
+    region |o--o{ profile : "lives in"
+    language |o--o{ profile : speaks
+    user ||--o{ availability_slot : "is free at"
+    user ||--o{ user_platform : "plays on"
+    platform ||--o{ user_platform : ""
+    user ||--o{ user_tag : "describes self with"
+    playstyle_tag ||--o{ user_tag : ""
+    user ||--o{ user_game : owns
+    game ||--o{ user_game : ""
+    game ||--o{ game_genre : ""
+    genre ||--o{ game_genre : ""
+    game ||--o{ game_platform : "runs on"
+    platform ||--o{ game_platform : ""
+
+    user {
+        int user_id PK
+        string email UK
+        string password_hash
+        enum status
+    }
+    profile {
+        int user_id PK, FK
+        string display_name UK
+        int region_id FK
+        int language_id FK
+        string timezone
+    }
+    availability_slot {
+        int slot_id PK
+        int user_id FK
+        int day_of_week
+        int start_minute "UTC"
+        int end_minute "UTC"
+    }
+    user_game {
+        int user_id PK, FK
+        int game_id PK, FK
+        int rank_tier
+        enum goal
+        bool is_primary
+    }
+    game {
+        int game_id PK
+        string title
+        string slug UK
+        bool is_multiplayer
+    }

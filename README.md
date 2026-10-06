@@ -40,20 +40,21 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 
 ## Where the project stands (2 Oct 2026)
 
-| Part                                                                                                      | Status          |
-| --------------------------------------------------------------------------------------------------------- | --------------- |
-| Project setup, CI, review rules                                                                           | ✅ Done         |
-| Database: 24 tables, migrations, normalisation write-up (the ER diagram picture is still to draw — Bryan) | ✅ Done         |
-| Real game data: 118,001 games imported with genres and platforms                                          | ✅ Done         |
-| Database programming: 6 views, 6 stored procedures, 7 triggers, indexes                                   | ✅ Done         |
-| Register, log in, log out (passwords hashed with argon2id)                                                | ✅ Done         |
-| Profiles: region, platform, games, tags, availability                                                     | ✅ Done (Alvin) |
-| Groups API: create, list, view, join, leave                                                               | ⬜ Česko²       |
-| Match query and `GET /api/matches`                                                                        | ⬜ Bryan        |
-| Group messages API                                                                                        | ✅ Alvin        |
-| Screens: login, profile, groups, matches, group detail                                                    | ⬜ rita         |
-| Demo data and tests                                                                                       | ⬜ Arman        |
-| ER diagram, report, performance evidence                                                                  | ⬜ Bryan        |
+| Part                                                                                       | Status          |
+| ------------------------------------------------------------------------------------------ | --------------- |
+| Project setup, CI, review rules                                                            | ✅ Done         |
+| Database: 24 tables, migrations, normalisation write-up (ER diagram: `docs/er-diagram.md`) | ✅ Done         |
+| Real game data: 118,001 games imported with genres and platforms                           | ✅ Done         |
+| Database programming: 6 views, 6 stored procedures, 7 triggers, indexes                    | ✅ Done         |
+| Register, log in, log out (passwords hashed with argon2id)                                 | ✅ Done         |
+| Profiles: region, platform, games, tags, availability                                      | ✅ Done (Alvin) |
+| Groups API: create, list, view, join, leave                                                | ⬜ Česko²       |
+| Match query and `GET /api/matches`                                                         | ⬜ Bryan        |
+| Group messages API                                                                         | ✅ Alvin        |
+| Screens: login, profile, groups, matches, group detail                                     | ⬜ rita         |
+| Demo data and tests                                                                        | ⬜ Arman        |
+| ER diagram and normalisation write-up                                                      | ✅ Bryan        |
+| Performance evidence (`EXPLAIN` before/after) and the Phase 1 hand-in                      | ⬜ Bryan        |
 
 ## Who does what
 
@@ -168,17 +169,20 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 
 ## Documentation
 
-| Doc                                      | What is in it                                                      |
-| ---------------------------------------- | ------------------------------------------------------------------ |
-| [`docs/SCOPE.md`](docs/SCOPE.md)         | What we build, what we cut, route budget, match score, timetable   |
-| [`docs/team/`](docs/team/)               | One step-by-step page per person                                   |
-| [`docs/schema.md`](docs/schema.md)       | Every table, the foreign keys, normalisation, procedures, triggers |
-| [`docs/api.md`](docs/api.md)             | Every endpoint and its JSON                                        |
-| [`docs/data.md`](docs/data.md)           | Where the game data came from and how it was cleaned               |
-| [`docs/decisions.md`](docs/decisions.md) | Why we chose what we chose (dated)                                 |
+| Doc                                              | What is in it                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| [`docs/SCOPE.md`](docs/SCOPE.md)                 | What we build, what we cut, route budget, match score, timetable   |
+| [`docs/team/`](docs/team/)                       | One step-by-step page per person                                   |
+| [`docs/er-diagram.md`](docs/er-diagram.md)       | The ER diagram, in two readable pictures                           |
+| [`docs/normalization.md`](docs/normalization.md) | How the data reaches 3NF, in plain English                         |
+| [`docs/matchmaking.md`](docs/matchmaking.md)     | How the match score works, with an example                         |
+| [`docs/schema.md`](docs/schema.md)               | Every table, the foreign keys, normalisation, procedures, triggers |
+| [`docs/api.md`](docs/api.md)                     | Every endpoint and its JSON                                        |
+| [`docs/data.md`](docs/data.md)                   | Where the game data came from and how it was cleaned               |
+| [`docs/decisions.md`](docs/decisions.md)         | Why we chose what we chose (dated)                                 |
 
-Still to be written by their owners: `docs/matchmaking.md`, `docs/performance.md`,
-`docs/security.md`, `docs/deployment.md`, `docs/demo.md`, `docs/normalization.md`.
+Still to be written by their owners: `docs/performance.md`, `docs/security.md`,
+`docs/deployment.md`, `docs/demo.md`.
 
 ## What is in the repository
 
