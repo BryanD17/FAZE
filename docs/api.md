@@ -207,3 +207,15 @@ Each owner adds their own rows to this file when their PR lands.
 
 How the score is worked out, with an example and the exact reply, is in
 [`matchmaking.md`](matchmaking.md).
+
+## Reports
+
+| Method | Path                   | Auth   | Purpose                                                 |
+| ------ | ---------------------- | ------ | ------------------------------------------------------- |
+| GET    | `/api/reports/summary` | Bearer | Read-only database snapshot for a "database stats" page |
+
+Reply: `{ totals: { users, games, groups, activeMembers, messages }, memberCountDrift, popularGames: [{ gameId, title, activeGroups, searchingUsers }] }`.
+`memberCountDrift` is the number of groups whose stored `member_count` differs from
+the real count (it must be `0`). `popularGames` is the top 10 from the
+`v_game_popularity` view. The view takes about 0.3 s on the full catalog, so call
+this once per page load, not in a loop.
