@@ -196,5 +196,14 @@ not retype them. Unknown fields are rejected with `400 VALIDATION_ERROR`.
 
 `GET /api/groups`, `POST /api/groups`, `GET /api/groups/:id`,
 `POST /api/groups/:id/join`, `POST /api/groups/:id/leave` (Česko²),
-`GET /api/matches` (Bryan), `GET` and `POST /api/groups/:id/messages` (Alvin).
+`GET` and `POST /api/groups/:id/messages` (Alvin).
 Each owner adds their own rows to this file when their PR lands.
+
+## Matches
+
+| Method | Path           | Auth   | Purpose                                                                                    |
+| ------ | -------------- | ------ | ------------------------------------------------------------------------------------------ |
+| GET    | `/api/matches` | Bearer | Up to 20 open groups ranked for you, each with a `score` (0–100) and the reasons behind it |
+
+How the score is worked out, with an example and the exact reply, is in
+[`matchmaking.md`](matchmaking.md).

@@ -49,8 +49,8 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Register, log in, log out (passwords hashed with argon2id)                                                | ✅ Done         |
 | Profiles: region, platform, games, tags, availability                                                     | ✅ Done (Alvin) |
 | Groups API: create, list, view, join, leave                                                               | ⬜ Česko²       |
-| Match query and `GET /api/matches`                                                                        | ⬜ Bryan        |
-| Group messages API                                                                                        | ✅ Alvin        |
+| Match query and `GET /api/matches`                                                                        | ✅ Bryan        |
+| Group messages API                                                                                        | ⬜ Alvin        |
 | Screens: login, profile, groups, matches, group detail                                                    | ⬜ rita         |
 | Demo data and tests                                                                                       | ⬜ Arman        |
 | ER diagram, report, performance evidence                                                                  | ⬜ Bryan        |
