@@ -20,6 +20,12 @@
 
    >>> Where this file and docs/SCOPE.md disagree, docs/SCOPE.md WINS. <<<
 
+ TEAM CHANGE (Oct 2026): Česko² (Cesko2), rita (ritaatech) and Arman
+ (ArmanA / Thrakos) are no longer on the project. Their work now belongs to
+ nickayvy. WHEREVER THIS FILE NAMES ONE OF THEM (HUMAN OWNER lines, lane
+ descriptions, the Appendix credits), READ "nickayvy". The team is now Bryan,
+ Alvin (LilAlFrmdao) and nickayvy. See docs/team/ for the current task pages.
+
  What changes for the sections below:
    - Agents 00-05 are DONE. Their code stays; features marked "frozen" in
      SCOPE.md (email verification, password reset, refresh rotation, profile
@@ -41,8 +47,8 @@ VERSION       : V1 (first master document for this repo — no predecessor)
 REPO          : https://github.com/BryanD17/FAZE.git
 OWNER         : Bryan Djenabia (BryanD17)
 TEAM          : Bryan (full-stack, agentic), adhduy / LilAlFrmdao (full-stack,
-                agentic), Česko² / Cesko2 (backend), rita / ritaatech (frontend),
-                Arman / ArmanA / Thrakos (flexible — data, ETL, QA)
+                agentic), nickayvy (backend, frontend, data and tests; took over
+                the lanes of Česko², rita and Arman in Oct 2026)
 CURRENT STATE : Empty/near-empty private repo. 4 collaborators added. Project
                 topic agreed in #project-ideas: "gaming group finder." No code,
                 no schema, no data, no README.
@@ -322,21 +328,21 @@ Status markers:  ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   ✅ AGENT 03 — ADVANCED MySQL: VIEWS, PROCEDURES, TRIGGERS, TRANSACTIONS
   ✅ AGENT 04 — AUTH (login/register/logout kept; verification, reset, rotation frozen)
   ✅ AGENT 05 — GAMER PROFILES (Alvin, PR #11)
-  ⬜ AGENT 06 — GROUPS API: create, list, view, join, leave (REDUCED — Česko²)
-  ⬜ AGENT 07 — MATCHMAKING: one SQL score, GET /api/matches (REDUCED — Bryan)
+  ⬜ AGENT 06 — GROUPS API: create, list, view, join, leave (REDUCED — nickayvy)
+  ✅ AGENT 07 — MATCHMAKING: one SQL score, GET /api/matches (Bryan, PR #14)
   ⬜ AGENT 08 — GROUP MESSAGES: list + post, polling (REDUCED — Alvin)
   ✂  AGENT 09 — API CONTRACT / OPENAPI (CUT — docs/api.md is kept by hand)
-  ⬜ AGENT 10 — FRONTEND BASE on the shared client/ workspace (REDUCED — rita)
-  ⬜ AGENT 11 — FRONTEND: login, register, profile (REDUCED — rita)
-  ⬜ AGENT 12 — FRONTEND: groups, matches, group detail, join/leave (REDUCED — rita)
-  ⬜ AGENT 13 — FRONTEND: chat box on the group page (REDUCED — rita + Alvin)
-  ⬜ AGENT 14 — DEMO DATA ~40 users / 15 groups / 200 messages (REDUCED — Arman)
-  ⬜ AGENT 18 — PHASE 1 DELIVERABLES: ER diagram, normalisation, report (REDUCED — Bryan)
+  ⬜ AGENT 10 — FRONTEND BASE on the shared client/ workspace (REDUCED — nickayvy)
+  ⬜ AGENT 11 — FRONTEND: login, register, profile (REDUCED — nickayvy)
+  ⬜ AGENT 12 — FRONTEND: groups, matches, group detail, join/leave (REDUCED — nickayvy)
+  ⬜ AGENT 13 — FRONTEND: chat box on the group page (REDUCED — nickayvy + Alvin)
+  ⬜ AGENT 14 — DEMO DATA ~40 users / 15 groups / 200 messages (REDUCED — nickayvy)
+  🔄 AGENT 18 — PHASE 1 DELIVERABLES: ER diagram, normalisation, report (Bryan; ER diagram and report draft merged, waiting on nickayvy and Alvin)
 
   PHASE 2 SCOPE (due Dec 7, 11:59pm)
-  ⬜ AGENT 15 — TESTS: about 15 key tests (REDUCED — Arman)
-  ⬜ AGENT 16 — PERFORMANCE: EXPLAIN before/after for 3 queries (REDUCED — Bryan)
-  ⬜ AGENT 17 — SECURITY: one-page check (REDUCED — Česko²)
+  ⬜ AGENT 15 — TESTS: about 15 key tests (REDUCED — nickayvy)
+  ✅ AGENT 16 — PERFORMANCE: EXPLAIN before/after for 3 queries (Bryan, PR #16)
+  ⬜ AGENT 17 — SECURITY: one-page check (REDUCED — nickayvy)
   ⬜ AGENT 19 — ONE RUNNABLE DEMO ENVIRONMENT (REDUCED — Alvin)
   ⬜ AGENT 20 — FINAL VERIFICATION: fresh clone follows the README (REDUCED — Bryan)
 
@@ -430,6 +436,11 @@ LEDGER NOTES (append a dated line every time an agent closes)
       person). The mail-provider item above is OBSOLETE: email verification is
       off (ALLOW_UNVERIFIED_LOGIN=true; production also needs DEMO_MODE=true).
       Agents 06-20 are reduced; agent 09 is cut.
+  [2026-10-06] AGENT 07 ✅ — GET /api/matches, one SQL score (PR #14).
+  [2026-10-06] AGENT 16 ✅ — EXPLAIN evidence and migration 0012 (PR #16).
+  [2026-10-06] TEAM — Česko², rita and Arman left the project. nickayvy took over
+      their work; Alvin keeps his. See docs/team/nickayvy.md. Agents 06, 10-15
+      and 17 now name nickayvy as owner.
   [2026-09-17] NOTE — Work is being delivered on the branch
       claude/new-session-rui3z9 rather than one branch per agent, because the
       session's operating instructions designate that branch and forbid pushing

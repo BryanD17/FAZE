@@ -1,7 +1,7 @@
 # FAZE — find your group
 
 **CS 514: Database Theory and Implementation — Fall 2026**
-Bryan Djenabia · Alvin Hoang · Česko² · rita · Arman
+Bryan Djenabia · Alvin Hoang · nickayvy
 
 ---
 
@@ -48,11 +48,11 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Database programming: 6 views, 6 stored procedures, 7 triggers, indexes                    | ✅ Done         |
 | Register, log in, log out (passwords hashed with argon2id)                                 | ✅ Done         |
 | Profiles: region, platform, games, tags, availability                                      | ✅ Done (Alvin) |
-| Groups API: create, list, view, join, leave                                                | ⬜ Česko²       |
+| Groups API: create, list, view, join, leave                                                | ⬜ nickayvy     |
 | Match query and `GET /api/matches`                                                         | ✅ Bryan        |
 | Group messages API                                                                         | ⬜ Alvin        |
-| Screens: login, profile, groups, matches, group detail                                     | ⬜ rita         |
-| Demo data and tests                                                                        | ⬜ Arman        |
+| Screens: login, profile, groups, matches, group detail                                     | ⬜ nickayvy     |
+| Demo data and tests                                                                        | ⬜ nickayvy     |
 | ER diagram and normalisation write-up                                                      | ✅ Bryan        |
 | Performance evidence: `EXPLAIN` before/after for three queries                             | ✅ Bryan        |
 | Phase 1 hand-in: report draft is written; waiting on teammates' paragraphs and screenshots | 🔄 Bryan        |
@@ -62,13 +62,11 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 Every person has their own step-by-step page. **Open yours and follow it from the
 top.** Do not start a task that is not on your page without asking first.
 
-| Person                            | Main job                                                                                        | Your page                                    |
-| --------------------------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| **Bryan Djenabia** (project lead) | Match query, `EXPLAIN` evidence, ER diagram, both hand-ins, reviewing and merging pull requests | [`docs/team/bryan.md`](docs/team/bryan.md)   |
-| **Alvin Hoang**                   | Drop-down lists route, group messages API, one demo environment                                 | [`docs/team/alvin.md`](docs/team/alvin.md)   |
-| **Česko²**                        | Groups API, a short security check, checking the ER diagram                                     | [`docs/team/cesko2.md`](docs/team/cesko2.md) |
-| **rita**                          | All the screens                                                                                 | [`docs/team/rita.md`](docs/team/rita.md)     |
-| **Arman** (Thrakos)               | Demo data, a small set of tests, data write-up                                                  | [`docs/team/arman.md`](docs/team/arman.md)   |
+| Person                            | Main job                                                                                        | Your page                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **Bryan Djenabia** (project lead) | Match query, `EXPLAIN` evidence, ER diagram, both hand-ins, reviewing and merging pull requests | [`docs/team/bryan.md`](docs/team/bryan.md)       |
+| **Alvin Hoang**                   | Group messages API, one demo environment                                                        | [`docs/team/alvin.md`](docs/team/alvin.md)       |
+| **nickayvy**                      | Groups API, all the screens, demo data, a small set of tests, a short security check            | [`docs/team/nickayvy.md`](docs/team/nickayvy.md) |
 
 The shared steps for branches, pull requests and setup are in
 [`docs/team/README.md`](docs/team/README.md).
@@ -151,8 +149,8 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 
 | Dates          | Goal                                                                                                                                              |
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2 – 8 Oct      | rita rebuilds the website base. Česko² builds the groups API. Arman writes the demo data script. Bryan builds the match query.                    |
-| 9 – 15 Oct     | rita builds the main screens. Alvin builds messages. Bryan writes the ER diagram and normalisation text. Arman adds the key tests.                |
+| 2 – 8 Oct      | nickayvy builds the groups API and the website base. Bryan builds the match query.                                                                |
+| 9 – 15 Oct     | nickayvy builds the main screens and the demo data script. Alvin builds messages. Bryan writes the ER diagram and normalisation text.             |
 | 16 – 19 Oct    | **Phase 1 due 19 Oct, 11:59 pm** (discussion post 50 pts + submission link 100 pts). Bryan submits; everyone adds one paragraph about their part. |
 | 20 Oct – 6 Dec | Chat screen, one demo environment, optional extras, screenshots, polish.                                                                          |
 | 7 Dec          | **Phase 2 due, 11:59 pm.**                                                                                                                        |

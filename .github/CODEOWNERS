@@ -1,32 +1,20 @@
-# Bryan is the required reviewer on everything that reaches main (§4.2).
+# Bryan is the required reviewer on everything that reaches main.
 *                       @BryanD17
 
 # Lane owners are auto-requested alongside Bryan so a change lands in front of
-# the person who owns that surface (§4.2). Lanes exist so four people can move
-# at once; reviewing your own lane is how that stays true.
+# the person who owns that surface. Paths with no line below (migrations,
+# repositories, the match query) are reviewed by Bryan alone.
 
-# Česko² — schema, advanced SQL objects, groups backend, security hardening
-/db/migrations/         @BryanD17 @Cesko2
-/server/src/db/queries/ @BryanD17 @Cesko2
-/server/src/repositories/ @BryanD17 @Cesko2
-/docs/schema.md         @BryanD17 @Cesko2
-/docs/security.md       @BryanD17 @Cesko2
+# Alvin: sign-in, profiles, messaging, deployment
+/server/src/routes/auth.ts      @BryanD17 @LilAlFrmdao
+/server/src/routes/profile.ts   @BryanD17 @LilAlFrmdao
+/server/src/routes/messages.ts  @BryanD17 @LilAlFrmdao
+/docs/deployment.md             @BryanD17 @LilAlFrmdao
 
-# adhduy — auth, profiles, messaging, realtime, deployment
-/server/src/routes/auth.ts    @BryanD17 @LilAlFrmdao
-/server/src/routes/users.ts   @BryanD17 @LilAlFrmdao
-/server/src/realtime/         @BryanD17 @LilAlFrmdao
-/docs/deployment.md           @BryanD17 @LilAlFrmdao
-
-# rita — the entire visual layer; sole owner of the UI primitives
-/client/                      @BryanD17 @ritaatech
-/client/src/components/ui/    @ritaatech
-/docs/frontend.md             @BryanD17 @ritaatech
-
-# Arman — data, ETL, seeds, QA
-/db/etl/                @BryanD17 @Thrakos
-/db/seeds/              @BryanD17 @Thrakos
-/server/tests/          @BryanD17 @Thrakos
-/docs/data.md           @BryanD17 @Thrakos
-/docs/testing.md        @BryanD17 @Thrakos
-/docs/demo.md           @BryanD17 @Thrakos
+# nickayvy: the groups API, the website, demo data, security notes
+/server/src/routes/groups.ts    @BryanD17 @nickayvy
+/client/                        @BryanD17 @nickayvy
+/db/seeds/                      @BryanD17 @nickayvy
+/docs/data.md                   @BryanD17 @nickayvy
+/docs/demo.md                   @BryanD17 @nickayvy
+/docs/security.md               @BryanD17 @nickayvy

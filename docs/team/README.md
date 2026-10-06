@@ -2,13 +2,11 @@
 
 Start here, then open **your own page**:
 
-| Person          | Your page              | What you are building                                                   |
-| --------------- | ---------------------- | ----------------------------------------------------------------------- |
-| Bryan Djenabia  | [bryan.md](bryan.md)   | Matching query, performance evidence, ER diagram, Phase 1 and 2 hand-in |
-| Alvin Hoang     | [alvin.md](alvin.md)   | Group messages API, one demo environment                                |
-| Česko²          | [cesko2.md](cesko2.md) | Groups API (create, list, view, join, leave), short security check      |
-| rita            | [rita.md](rita.md)     | Every screen the user sees                                              |
-| Arman (Thrakos) | [arman.md](arman.md)   | Demo data, tests, data documentation                                    |
+| Person         | Your page                  | What you are building                                                   |
+| -------------- | -------------------------- | ----------------------------------------------------------------------- |
+| Bryan Djenabia | [bryan.md](bryan.md)       | Matching query, performance evidence, ER diagram, Phase 1 and 2 hand-in |
+| Alvin Hoang    | [alvin.md](alvin.md)       | Group messages API, one demo environment                                |
+| nickayvy       | [nickayvy.md](nickayvy.md) | Groups API, every screen, demo data, tests, short security check        |
 
 What we are and are not building is on one page: [`../SCOPE.md`](../SCOPE.md).
 **If a task is not on your page, do not build it.** Ask in Discord first.

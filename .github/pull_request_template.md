@@ -4,7 +4,7 @@
 
 ## Which task is this?
 
-<!-- Your page in docs/team/ and the task number, e.g. "cesko2.md, Task 1". -->
+<!-- Your page in docs/team/ and the task number, e.g. "nickayvy.md, Task 1". -->
 
 ## Proof it works
 

@@ -1,7 +1,7 @@
 # FAZE — Phase 1 report (draft)
 
 **CS 514: Database Theory and Implementation — Fall 2026**
-Team: Bryan Djenabia, Alvin Hoang, Česko², rita, Arman
+Team: Bryan Djenabia, Alvin Hoang, nickayvy
 
 > **Status of this draft.** Everything below is taken from the repository and
 > the running database. Items marked **[TO ADD]** depend on a teammate's work
@@ -145,33 +145,31 @@ Measured with `EXPLAIN ANALYZE` on 20,000 users, 5,000 groups and 118,001 games
 - Every SQL value is a bound parameter; only repositories contain SQL.
 - Protected routes require a signed-in user (tested). Restricting group data to
   members arrives with the groups and messages APIs.
-  **[TO ADD — Česko²'s one-page check, `docs/security.md`]**
+  **[TO ADD — nickayvy's one-page check, `docs/security.md`]**
 
 ## 8. Testing
 
 60 automated tests run in CI against a real MySQL (sign-in, profiles, the
-transaction helper, lookups and the match query). **[TO ADD — Arman's key
+transaction helper, lookups and the match query). **[TO ADD — nickayvy's key
 database-integrity tests]**
 
 ## 9. Run it yourself
 
 Setup is five commands in the [README](../README.md). The demo login and a
-five-step click-through will be in `docs/demo.md` **[TO ADD — Arman]**.
+five-step click-through will be in `docs/demo.md` **[TO ADD — nickayvy]**.
 
 ## 10. Screenshots
 
-**[TO ADD — rita: login, profile, groups, matches, group detail; save in
+**[TO ADD — nickayvy: login, profile, groups, matches, group detail; save in
 `docs/screenshots/`]**
 
 ## 11. Who did what
 
-| Person | Part                                                                                                                 | Paragraph                            |
-| ------ | -------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
-| Bryan  | Project setup and review, schema and migration runner, matching query, performance evidence, ER diagram, this report | This report                          |
-| Alvin  | Sign-in, profiles (region, platform, games, tags, availability), lookup lists, messages API                          | **[TO ADD — Alvin, 3–4 sentences]**  |
-| Česko² | Groups API, security check, ER diagram review                                                                        | **[TO ADD — Česko², 3–4 sentences]** |
-| rita   | Every screen                                                                                                         | **[TO ADD — rita, 3–4 sentences]**   |
-| Arman  | Game data import, demo data, tests                                                                                   | **[TO ADD — Arman, 3–4 sentences]**  |
+| Person   | Part                                                                                                                                   | Paragraph                              |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| Bryan    | Project setup and review, schema and migration runner, game data import, matching query, performance evidence, ER diagram, this report | This report                            |
+| Alvin    | Sign-in, profiles (region, platform, games, tags, availability), lookup lists, messages API                                            | **[TO ADD — Alvin, 3–4 sentences]**    |
+| nickayvy | Groups API, every screen, demo data, tests, security check                                                                             | **[TO ADD — nickayvy, 3–4 sentences]** |
 
 ## 12. What is still open (honest list)
 

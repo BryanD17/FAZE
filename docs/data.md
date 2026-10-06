@@ -1,6 +1,6 @@
 # Data sources, ETL pipeline, and data quality
 
-**Owner:** Arman · **Source of truth:** `db/etl/`, migration `0006_init_staging_and_etl.sql`
+**Owner:** nickayvy · **Source of truth:** `db/etl/`, migration `0006_init_staging_and_etl.sql`
 
 FAZE needs a real game catalog — tens of thousands of titles with real genres,
 platforms and release dates — because the matchmaking query is meaningless

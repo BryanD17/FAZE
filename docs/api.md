@@ -1,7 +1,7 @@
 # API contract
 
 > **Status:** this file documents the endpoints that exist so the people building
-> against them (rita for the screens, everyone for tests) are not guessing. We are
+> against them (nickayvy for the screens, everyone for tests) are not guessing. We are
 > **not** generating OpenAPI or freezing an enterprise contract — see
 > `docs/SCOPE.md`. Request shapes are the zod schemas in `shared/src/schemas/` —
 > import those, do not retype them.
@@ -195,7 +195,7 @@ not retype them. Unknown fields are rejected with `400 VALIDATION_ERROR`.
 ## Still to come (see `docs/SCOPE.md`)
 
 `GET /api/groups`, `POST /api/groups`, `GET /api/groups/:id`,
-`POST /api/groups/:id/join`, `POST /api/groups/:id/leave` (Česko²),
+`POST /api/groups/:id/join`, `POST /api/groups/:id/leave` (nickayvy),
 `GET` and `POST /api/groups/:id/messages` (Alvin).
 Each owner adds their own rows to this file when their PR lands.
 
