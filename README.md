@@ -43,7 +43,7 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Part                                                                                       | Status          |
 | ------------------------------------------------------------------------------------------ | --------------- |
 | Project setup, CI, review rules                                                            | ✅ Done         |
-| Database: 24 tables, migrations, normalisation write-up (ER diagram: `docs/er-diagram.md`) | ✅ Done         |
+| Database: 29 tables, migrations, normalisation write-up (ER diagram: `docs/er-diagram.md`) | ✅ Done         |
 | Real game data: 118,001 games imported with genres and platforms                           | ✅ Done         |
 | Database programming: 6 views, 6 stored procedures, 7 triggers, indexes                    | ✅ Done         |
 | Register, log in, log out (passwords hashed with argon2id)                                 | ✅ Done         |

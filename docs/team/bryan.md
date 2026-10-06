@@ -9,7 +9,7 @@ reviewer and the only person who merges pull requests.
 ## Already done
 
 - ✅ Project scaffold, CI, and review rules.
-- ✅ Schema (24 tables), migration runner, game import, stored procedures,
+- ✅ Schema (29 tables), migration runner, game import, stored procedures,
   triggers, views, and the login system.
 - ✅ Branch protection is **not** done yet — see step 1 below.
 
