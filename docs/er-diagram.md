@@ -1,7 +1,8 @@
 # ER diagram
 
-FAZE has **24 tables**. They are drawn below in two pictures so each one stays
-readable, and the remaining housekeeping tables are listed after them. Every
+FAZE has **29 tables** for the application (plus 4 temporary staging tables and
+the migration log). 20 are drawn below in two pictures so each one stays
+readable, and the 9 housekeeping tables are listed after them. Every
 box and line comes from the real database (`information_schema`), and the full
 column list for every table is in [`schema.md`](schema.md).
 

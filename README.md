@@ -43,7 +43,7 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Part                                                                                       | Status          |
 | ------------------------------------------------------------------------------------------ | --------------- |
 | Project setup, CI, review rules                                                            | ✅ Done         |
-| Database: 24 tables, migrations, normalisation write-up (ER diagram: `docs/er-diagram.md`) | ✅ Done         |
+| Database: 29 tables, migrations, normalisation write-up (ER diagram: `docs/er-diagram.md`) | ✅ Done         |
 | Real game data: 118,001 games imported with genres and platforms                           | ✅ Done         |
 | Database programming: 6 views, 6 stored procedures, 7 triggers, indexes                    | ✅ Done         |
 | Register, log in, log out (passwords hashed with argon2id)                                 | ✅ Done         |
@@ -54,7 +54,8 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Screens: login, profile, groups, matches, group detail                                     | ⬜ rita         |
 | Demo data and tests                                                                        | ⬜ Arman        |
 | ER diagram and normalisation write-up                                                      | ✅ Bryan        |
-| Performance evidence (`EXPLAIN` before/after) and the Phase 1 hand-in                      | ⬜ Bryan        |
+| Performance evidence: `EXPLAIN` before/after for three queries                             | ✅ Bryan        |
+| Phase 1 hand-in (report, screenshots, submission)                                          | ⬜ Bryan        |
 
 ## Who does what
 
@@ -153,7 +154,7 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 | 2 – 8 Oct      | rita rebuilds the website base. Česko² builds the groups API. Arman writes the demo data script. Bryan builds the match query.                    |
 | 9 – 15 Oct     | rita builds the main screens. Alvin builds messages. Bryan writes the ER diagram and normalisation text. Arman adds the key tests.                |
 | 16 – 19 Oct    | **Phase 1 due 19 Oct, 11:59 pm** (discussion post 50 pts + submission link 100 pts). Bryan submits; everyone adds one paragraph about their part. |
-| 20 Oct – 6 Dec | Chat screen, performance evidence, one demo environment, optional extras, screenshots, polish.                                                    |
+| 20 Oct – 6 Dec | Chat screen, one demo environment, optional extras, screenshots, polish.                                                                          |
 | 7 Dec          | **Phase 2 due, 11:59 pm.**                                                                                                                        |
 
 ## How we work together
@@ -176,13 +177,14 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 | [`docs/er-diagram.md`](docs/er-diagram.md)       | The ER diagram, in two readable pictures                           |
 | [`docs/normalization.md`](docs/normalization.md) | How the data reaches 3NF, in plain English                         |
 | [`docs/matchmaking.md`](docs/matchmaking.md)     | How the match score works, with an example                         |
+| [`docs/performance.md`](docs/performance.md)     | `EXPLAIN` before/after for the three queries that matter           |
 | [`docs/schema.md`](docs/schema.md)               | Every table, the foreign keys, normalisation, procedures, triggers |
 | [`docs/api.md`](docs/api.md)                     | Every endpoint and its JSON                                        |
 | [`docs/data.md`](docs/data.md)                   | Where the game data came from and how it was cleaned               |
 | [`docs/decisions.md`](docs/decisions.md)         | Why we chose what we chose (dated)                                 |
 
-Still to be written by their owners: `docs/performance.md`, `docs/security.md`,
-`docs/deployment.md`, `docs/demo.md`.
+Still to be written by their owners: `docs/security.md`, `docs/deployment.md`,
+`docs/demo.md`.
 
 ## What is in the repository
 
