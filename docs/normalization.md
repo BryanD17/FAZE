@@ -73,7 +73,7 @@ when saving and store only the result.
 `group_member`. We keep it on purpose, because the match and browse queries read
 it for every group and counting each time would be slow. Triggers are the only
 thing allowed to change it, and the view `v_member_count_reconciliation` shows
-any drift (it must always be empty). See [`schema.md`](schema.md) §6.
+any drift (its `drift` column must always be 0). See [`schema.md`](schema.md) §6.
 
 ## Result
 
