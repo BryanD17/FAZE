@@ -65,7 +65,7 @@ weights, extra filters.
 
 1. Draw the ER diagram (draw.io, dbdiagram.io or MySQL Workbench's reverse
    engineer) from the real tables in [`../schema.md`](../schema.md). Export a PNG
-   to `docs/er-diagram.png`. Ask Česko² to check it.
+   to `docs/er-diagram.png`. Optionally ask nickayvy to check it.
 2. In `docs/normalization.md` explain, in plain English, how one messy table
    becomes 1NF, 2NF and 3NF with two or three concrete examples from FAZE.
    `schema.md` §4 already has a full walk-through — shorten it to one page.

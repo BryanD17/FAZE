@@ -1,6 +1,6 @@
 # FAZE schema — data dictionary, keys, and the normalization argument
 
-**Owner:** Česko² (co-designed with Bryan) · **Engine:** MySQL 8, InnoDB,
+**Owner:** Bryan · **Engine:** MySQL 8, InnoDB,
 `utf8mb4_0900_ai_ci` · **Source of truth:** `db/migrations/0001`–`0005`
 
 This document is the written half of the database design. Section 4 (the
@@ -639,7 +639,7 @@ Schema changes are numbered SQL files under `db/migrations/`, applied by
 
 ## 9. Database programming
 
-**Owner:** Česko² · **Source of truth:** `db/migrations/0007`–`0010`,
+**Owner:** Bryan · **Source of truth:** `db/migrations/0007`–`0010`,
 verified by `db/scripts/verify_objects.js`
 
 This is where a database course's grade separates from a CRUD app: the

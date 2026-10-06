@@ -1,8 +1,7 @@
 # Alvin Hoang — your tasks
 
-**Your goal in one sentence:** give the screens the lists they need, finish the group chat on the
-server side, and make the whole project run for a demo with as little fuss as
-possible.
+**Your goal in one sentence:** finish the group chat on the server side, and
+make the whole project run for a demo with as little fuss as possible.
 
 First read the shared workflow in [README.md](README.md) (it explains branches
 and pull requests). This page only lists _your_ work.
@@ -18,11 +17,11 @@ and pull requests). This page only lists _your_ work.
 
 ## Your tasks, in order
 
-### Task 1 — Lookup lists for the profile form (about 1 hour, **do this first**)
+### Task 1 — Lookup lists for the profile form ✅ done (PR #13)
 
-rita's profile and group forms need drop-downs for regions, languages,
-platforms and play-style tags, and no route returns them yet. She is blocked
-until it exists.
+The profile and group forms need drop-downs for regions, languages, platforms
+and play-style tags. `GET /api/lookups` now returns them. The steps are kept
+below for reference.
 
 1. Branch: `git switch -c lookups-route`.
 2. Add `server/src/repositories/lookup.repo.ts` with one function that runs four
@@ -75,9 +74,9 @@ test user appearing for another member of the same group.
 typing indicators. The screen will simply ask for new messages every few
 seconds.
 
-> Heads-up: `GET/POST /api/groups/:id/...` needs the groups routes that Česko²
-> is writing. Until they land, test with a group you create by calling
-> `sp_create_group` in MySQL, or ask Česko² which branch to borrow.
+> Heads-up: `GET/POST /api/groups/:id/...` needs the groups routes that
+> nickayvy is writing. Until they land, test with a group you create by calling
+> `sp_create_group` in MySQL, or ask nickayvy which branch to borrow.
 
 ### Task 3 — One demo environment (about 3 hours, do it after Phase 1)
 
@@ -87,8 +86,8 @@ the instructor wants it) one hosted copy.
 1. Make a branch: `git switch -c demo-environment`.
 2. Write the steps in `docs/deployment.md` using plain language: install, copy
    `.env.example`, `docker compose up -d`, `npm run db:migrate`,
-   `npm run etl:all`, `npm run db:seed` (Arman's script — it appears once his
-   task is merged), `npm run dev`.
+   `npm run etl:all`, `npm run db:seed` (nickayvy's script — it appears once it is
+   merged), `npm run dev`.
 3. Run the steps yourself on a **clean folder** and fix anything that breaks.
 4. If a hosted copy is needed: choose one free host (for example Render or
    Railway), set `NODE_ENV=production`, `DEMO_MODE=true`,
@@ -101,10 +100,10 @@ the instructor wants it) one hosted copy.
 
 **Do not build:** Kubernetes, load balancers, monitoring, backups, CI deploys.
 
-### Task 4 — Group chat wiring (with rita)
+### Task 4 — Group chat wiring (with nickayvy)
 
-rita builds the chat box on the group page. Help her wire it to your two
-endpoints and fix any server bug she finds. No new work for you beyond that.
+nickayvy builds the chat box on the group page. Help them wire it to your two
+endpoints and fix any server bug they find. No new work for you beyond that.
 
 ## Not on your list any more
 
