@@ -19,6 +19,7 @@ import { createAuthRouter } from './routes/auth.js';
 import { gamesRouter } from './routes/games.js';
 import { healthRouter } from './routes/health.js';
 import { lookupsRouter } from './routes/lookups.js';
+import { matchesRouter } from './routes/matches.js';
 import { profileRouter } from './routes/profile.js';
 import { createAuthService } from './services/auth.service.js';
 import { createDefaultMailer } from './services/mailer.js';
@@ -61,6 +62,7 @@ export function createApp(opts: AppOptions = {}) {
   );
 
   app.use('/api/lookups', lookupsRouter);
+  app.use('/api/matches', matchesRouter);
   app.use('/api/profile', profileRouter);
   app.use('/api/games', gamesRouter);
 
