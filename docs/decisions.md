@@ -119,6 +119,8 @@ column with a real type and a real constraint.
 
 ## 2026-09-17 — Keyset pagination everywhere, never OFFSET
 
+_Superseded for the groups list on 2026-10-07; see the last entry in this file._
+
 **Decision:** Every list endpoint paginates on an opaque cursor encoding the
 sort tuple. No endpoint uses `OFFSET`.
 
@@ -278,3 +280,15 @@ Consequences, all deliberate:
 - No new tables, procedures, triggers or views. No more decision records.
 - Chat refreshes by polling; there are no live sockets.
 - Matching is one SQL score: 50 same game + 20 same region + up to 30 availability.
+
+## 2026-10-07 — The groups list uses plain page numbers
+
+**Decision:** `GET /api/groups` pages with `?page=N` (20 per page, `LIMIT 20 OFFSET …`)
+instead of keyset cursors. This supersedes "Keyset pagination everywhere" for
+that one list.
+
+The earlier rule protects against `OFFSET 10000` walking and discarding thousands
+of rows. A group list never gets that deep (filters narrow it, and a class demo
+holds dozens of groups), the plain version is easier to read and to build a
+screen against, and `docs/SCOPE.md` already lists cursor pagination as cut.
+Game search keeps its cursor because the catalog has 118,001 rows.

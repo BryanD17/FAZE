@@ -48,7 +48,7 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Database programming: 6 views, 6 stored procedures, 7 triggers, indexes                    | ✅ Done         |
 | Register, log in, log out (passwords hashed with argon2id)                                 | ✅ Done         |
 | Profiles: region, platform, games, tags, availability                                      | ✅ Done (Alvin) |
-| Groups API: create, list, view, join, leave                                                | ⬜ nickayvy     |
+| Groups API: create, list, view, join, leave                                                | ✅ nickayvy     |
 | Match query and `GET /api/matches`                                                         | ✅ Bryan        |
 | Group messages API                                                                         | ⬜ Alvin        |
 | Screens: login, profile, groups, matches, group detail                                     | ⬜ nickayvy     |

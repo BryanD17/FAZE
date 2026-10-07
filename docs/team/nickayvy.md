@@ -33,7 +33,7 @@ than skipping something silently.
 
 ## Before Phase 1 (19 Oct)
 
-### Task 1 — Groups API (about 5–6 hours, **do this first**)
+### Task 1 — Groups API ✅ done (PR #21)
 
 Alvin's messages API and your own screens both need it.
 

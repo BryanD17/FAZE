@@ -328,7 +328,7 @@ Status markers:  ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   ✅ AGENT 03 — ADVANCED MySQL: VIEWS, PROCEDURES, TRIGGERS, TRANSACTIONS
   ✅ AGENT 04 — AUTH (login/register/logout kept; verification, reset, rotation frozen)
   ✅ AGENT 05 — GAMER PROFILES (Alvin, PR #11)
-  ⬜ AGENT 06 — GROUPS API: create, list, view, join, leave (REDUCED — nickayvy)
+  ✅ AGENT 06 — GROUPS API: create, list, view, join, leave (nickayvy, PR #21)
   ✅ AGENT 07 — MATCHMAKING: one SQL score, GET /api/matches (Bryan, PR #14)
   ⬜ AGENT 08 — GROUP MESSAGES: list + post, polling (REDUCED — Alvin)
   ✂  AGENT 09 — API CONTRACT / OPENAPI (CUT — docs/api.md is kept by hand)
@@ -438,6 +438,7 @@ LEDGER NOTES (append a dated line every time an agent closes)
       Agents 06-20 are reduced; agent 09 is cut.
   [2026-10-06] AGENT 07 ✅ — GET /api/matches, one SQL score (PR #14).
   [2026-10-06] AGENT 16 ✅ — EXPLAIN evidence and migration 0012 (PR #16).
+  [2026-10-07] AGENT 06 ✅ — groups API (nickayvy, PR #21): 74 tests, 8-way race test passes every run.
   [2026-10-06] TEAM — Česko², rita and Arman left the project. nickayvy took over
       their work; Alvin keeps his. See docs/team/nickayvy.md. Agents 06, 10-15
       and 17 now name nickayvy as owner.
