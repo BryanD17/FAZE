@@ -17,6 +17,7 @@ import { createAuthRateLimiters } from './middleware/rateLimit.js';
 import type { AuthRateLimits } from './middleware/rateLimit.js';
 import { createAuthRouter } from './routes/auth.js';
 import { gamesRouter } from './routes/games.js';
+import { groupsRouter } from './routes/groups.js';
 import { healthRouter } from './routes/health.js';
 import { lookupsRouter } from './routes/lookups.js';
 import { matchesRouter } from './routes/matches.js';
@@ -67,6 +68,7 @@ export function createApp(opts: AppOptions = {}) {
   app.use('/api/reports', reportsRouter);
   app.use('/api/profile', profileRouter);
   app.use('/api/games', gamesRouter);
+  app.use('/api/groups', groupsRouter);
 
   app.use(notFound);
   app.use(errorHandler);
