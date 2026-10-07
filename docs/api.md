@@ -194,10 +194,44 @@ not retype them. Unknown fields are rejected with `400 VALIDATION_ERROR`.
 
 ## Still to come (see `docs/SCOPE.md`)
 
-`GET /api/groups`, `POST /api/groups`, `GET /api/groups/:id`,
-`POST /api/groups/:id/join`, `POST /api/groups/:id/leave` (nickayvy),
 `GET` and `POST /api/groups/:id/messages` (Alvin).
 Each owner adds their own rows to this file when their PR lands.
+
+## Groups
+
+All five routes need `Authorization: Bearer <token>`. Request shapes are
+`createGroupSchema` and `groupListQuerySchema` in `shared/src/schemas/group.ts`.
+Groups are always created open to join; there is no approval step. Archived
+groups (everyone left) behave as if they do not exist.
+
+| Method | Path                    | Body / query                                                                                                | Purpose                                  |
+| ------ | ----------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| GET    | `/api/groups`           | query: `gameId`, `platformId`, `regionId` (all optional), `page` (default 1)                                | 20 groups per page, newest first         |
+| POST   | `/api/groups`           | `{ gameId, title 3–120, description? ≤1000, regionId, languageId, maxMembers 2–10, platformIds: 1–10 ids }` | Create a group; you become its owner     |
+| GET    | `/api/groups/:id`       | —                                                                                                           | One group with its members               |
+| POST   | `/api/groups/:id/join`  | —                                                                                                           | Join (`sp_join_group`, safe under races) |
+| POST   | `/api/groups/:id/leave` | —                                                                                                           | Leave (`sp_leave_group`)                 |
+
+**List** `200` → `{ groups: Card[], page, hasMore }`, where a card is
+`{ groupId, title, gameId, gameTitle, gameCoverUrl, regionCode, ownerDisplayName,
+memberCount, maxMembers, openSlots, platforms: string[], status, createdAt }`
+(the same fields `GET /api/matches` uses, without the score).
+
+**Detail** `200` (and **create** `201`) → a card plus `{ description, languageCode,
+regionName, myRole: 'owner' | 'moderator' | 'member' | null, members: [{ displayName,
+role, joinedAt }] }`. `myRole` is `null` when you are not a member.
+
+**Join** `200` → `{ "result": "JOINED" }`. **Leave** `200` →
+`{ "result": "LEFT_MEMBER_REMAINS" | "LEFT_SUCCESSOR_PROMOTED" | "LEFT_GROUP_ARCHIVED" }`.
+
+| Status | `code`              | When                                                                              |
+| ------ | ------------------- | --------------------------------------------------------------------------------- |
+| 400    | `VALIDATION_ERROR`  | Bad body or query, or `:id` is not a positive integer (`field: "id"`)             |
+| 404    | `GROUP_NOT_FOUND`   | No such group, the group is archived, or you leave a group you are not in         |
+| 409    | `GROUP_FULL`        | Join: no free seat                                                                |
+| 409    | `ALREADY_MEMBER`    | Join: you are already in the group                                                |
+| 409    | the procedure code  | Join: any other refusal from `sp_join_group`                                      |
+| 422    | `INVALID_REFERENCE` | Create: an id does not exist, or the game is not multiplayer (`field` says which) |
 
 ## Matches
 
