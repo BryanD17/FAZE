@@ -1,58 +1,45 @@
-import { useEffect, useState } from 'react';
-import { healthResponseSchema, type HealthResponse } from '@faze/shared';
+import { BrowserRouter, NavLink, Route, Routes } from 'react-router-dom';
+import { Home } from './pages/Home.tsx';
+import { Placeholder } from './pages/Placeholder.tsx';
 
-/**
- * Scaffold shell. AGENT 10 replaces this with the real app shell, design
- * system and router; for now it proves the client/server/shared wiring is
- * live by rendering the actual /api/health response.
- *
- * Note the four states (rule R8) are present even here: loading, error,
- * loaded, and the "down" case. A screen with only a happy path is not done.
- */
-type State =
-  | { status: 'loading' }
-  | { status: 'error'; message: string }
-  | { status: 'loaded'; health: HealthResponse };
+const links = [
+  { to: '/groups', label: 'Groups' },
+  { to: '/matches', label: 'Matches' },
+  { to: '/profile', label: 'Profile' },
+  { to: '/login', label: 'Log in' },
+  { to: '/register', label: 'Register' },
+];
+
+function navClass({ isActive }: { isActive: boolean }) {
+  return isActive ? 'text-accent' : 'text-content-muted hover:text-content-primary';
+}
 
 export function App() {
-  const [state, setState] = useState<State>({ status: 'loading' });
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetch('/api/health', { signal: controller.signal })
-      .then(async (res) => healthResponseSchema.parse(await res.json()))
-      .then((health) => setState({ status: 'loaded', health }))
-      .catch((err: unknown) => {
-        if (controller.signal.aborted) return;
-        setState({
-          status: 'error',
-          message: err instanceof Error ? err.message : 'Unknown error',
-        });
-      });
-    return () => controller.abort();
-  }, []);
-
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center gap-4 px-4">
-      <h1 className="text-4xl font-semibold tracking-tight">FAZE</h1>
-      <p className="text-content-muted">
-        Gaming group finder — CS 514 Database Theory and Implementation, Fall 2026.
-      </p>
+    <BrowserRouter>
+      <header className="flex h-16 items-center justify-between border-b border-subtle px-6">
+        <NavLink to="/" className="text-xl font-bold">
+          FAZE
+        </NavLink>
+        <nav className="flex gap-5">
+          {links.map((link) => (
+            <NavLink key={link.to} to={link.to} className={navClass}>
+              {link.label}
+            </NavLink>
+          ))}
+        </nav>
+      </header>
 
-      <section
-        aria-live="polite"
-        className="rounded border border-subtle bg-surface-raised p-4 shadow-raised"
-      >
-        {state.status === 'loading' && <p className="text-content-muted">Checking API health…</p>}
-        {state.status === 'error' && (
-          <p className="text-danger">API unreachable: {state.message}</p>
-        )}
-        {state.status === 'loaded' && (
-          <p className={state.health.db === 'up' ? 'text-success' : 'text-warn'}>
-            API ok: {String(state.health.ok)} · database: {state.health.db}
-          </p>
-        )}
-      </section>
-    </main>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Placeholder title="Log in" />} />
+        <Route path="/register" element={<Placeholder title="Register" />} />
+        <Route path="/profile" element={<Placeholder title="Profile" />} />
+        <Route path="/groups" element={<Placeholder title="Groups" />} />
+        <Route path="/groups/:id" element={<Placeholder title="Group" />} />
+        <Route path="/matches" element={<Placeholder title="Matches" />} />
+        <Route path="*" element={<Placeholder title="Page not found" />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
