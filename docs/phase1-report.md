@@ -173,7 +173,7 @@ five-step click-through will be in `docs/demo.md` **[TO ADD — nickayvy]**.
 
 ## 12. What is still open (honest list)
 
-- The groups API is done (PR #21). The messages API and all screens are in progress.
+- The groups API (PR #21) and the screens (PRs #24 to #26) are done. The messages API is in progress, so the chat box shows "not available yet".
 - RAWG cover art is not loaded; the website shows a placeholder.
 - Email sending is not built; accounts are active when they register.
 - Optional extras (sessions, ratings, an admin stats page) only if time allows.

@@ -332,10 +332,10 @@ Status markers:  ⬜ NOT STARTED | 🔄 IN PROGRESS | ✅ COMPLETE | ⛔ BLOCKED
   ✅ AGENT 07 — MATCHMAKING: one SQL score, GET /api/matches (Bryan, PR #14)
   ⬜ AGENT 08 — GROUP MESSAGES: list + post, polling (REDUCED — Alvin)
   ✂  AGENT 09 — API CONTRACT / OPENAPI (CUT — docs/api.md is kept by hand)
-  ⬜ AGENT 10 — FRONTEND BASE on the shared client/ workspace (REDUCED — nickayvy)
-  ⬜ AGENT 11 — FRONTEND: login, register, profile (REDUCED — nickayvy)
-  ⬜ AGENT 12 — FRONTEND: groups, matches, group detail, join/leave (REDUCED — nickayvy)
-  ⬜ AGENT 13 — FRONTEND: chat box on the group page (REDUCED — nickayvy + Alvin)
+  ✅ AGENT 10 — FRONTEND BASE on the shared client/ workspace (nickayvy, PR #24)
+  ✅ AGENT 11 — FRONTEND: login, register, profile (nickayvy, PR #25)
+  ✅ AGENT 12 — FRONTEND: groups, matches, group detail, join/leave (nickayvy, PR #26)
+  🔄 AGENT 13 — FRONTEND: chat box on the group page (nickayvy; box built in PR #26, waiting for Alvin's messages API)
   ⬜ AGENT 14 — DEMO DATA ~40 users / 15 groups / 200 messages (REDUCED — nickayvy)
   🔄 AGENT 18 — PHASE 1 DELIVERABLES: ER diagram, normalisation, report (Bryan; ER diagram and report draft merged, waiting on nickayvy and Alvin)
 
@@ -439,6 +439,7 @@ LEDGER NOTES (append a dated line every time an agent closes)
   [2026-10-06] AGENT 07 ✅ — GET /api/matches, one SQL score (PR #14).
   [2026-10-06] AGENT 16 ✅ — EXPLAIN evidence and migration 0012 (PR #16).
   [2026-10-07] AGENT 06 ✅ — groups API (nickayvy, PR #21): 74 tests, 8-way race test passes every run.
+  [2026-10-08] AGENT 10, 11, 12 ✅ — website base, auth/profile screens, groups/matches/detail screens (nickayvy, PRs #24-#26). Chat box built; it shows 'not available yet' until the messages API lands.
   [2026-10-06] TEAM — Česko², rita and Arman left the project. nickayvy took over
       their work; Alvin keeps his. See docs/team/nickayvy.md. Agents 06, 10-15
       and 17 now name nickayvy as owner.
