@@ -6,11 +6,11 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from '../components/Field.tsx';
-import { api, ApiError } from '../lib/api.ts';
+import { GameSearch } from '../components/GameSearch.tsx';
+import { api, ApiError, messageOf } from '../lib/api.ts';
+import { toggle } from '../lib/list.ts';
+import type { Game, Lookups } from '../lib/types.ts';
 
-type LookupItem = { id: number; name: string };
-type SluggedItem = LookupItem & { slug: string };
-type Lookups = { regions: LookupItem[]; platforms: SluggedItem[]; tags: SluggedItem[] };
 type Me = {
   displayName: string;
   regionId: number | null;
@@ -18,7 +18,6 @@ type Me = {
   platforms: string[];
   tags: string[];
 };
-type Game = { id: number; title: string };
 type Availability = { timezone: string; local: LocalAvailabilitySlot[] };
 
 type Form = {
@@ -36,14 +35,6 @@ const BROWSER_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const MAX_TAGS = 5;
 const FIELDS = ['displayName', 'regionId', 'timezone', 'platformIds', 'tagIds', 'availability'];
 
-function messageOf(err: unknown) {
-  return err instanceof Error ? err.message : 'Something went wrong.';
-}
-
-function toggle(list: number[], id: number) {
-  return list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
-}
-
 export function Profile() {
   const [lookups, setLookups] = useState<Lookups | null>(null);
   const [form, setForm] = useState<Form | null>(null);
@@ -55,8 +46,6 @@ export function Profile() {
   const [saved, setSaved] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<Game[] | null>(null);
   const [gameError, setGameError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -168,19 +157,6 @@ export function Profile() {
       }
     } finally {
       setSaving(false);
-    }
-  }
-
-  async function onSearch(event: FormEvent) {
-    event.preventDefault();
-    const q = query.trim();
-    if (!q) return;
-    setGameError(null);
-    try {
-      const res = await api<{ data: Game[] }>(`/games/search?q=${encodeURIComponent(q)}&limit=10`);
-      setResults(res.data);
-    } catch (err) {
-      setGameError(messageOf(err));
     }
   }
 
@@ -379,42 +355,11 @@ export function Profile() {
           </ul>
         )}
 
-        <form onSubmit={onSearch} className="flex gap-2">
-          <input
-            aria-label="Search games"
-            placeholder="Search games, e.g. Counter-Strike"
-            className={inputClass}
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <button type="submit" className={secondaryButtonClass}>
-            Search
-          </button>
-        </form>
-        {gameError && <p className="text-sm text-danger">{gameError}</p>}
-        {results && results.length === 0 && (
-          <p className="text-sm text-content-muted">No games found.</p>
-        )}
-        {results && results.length > 0 && (
-          <ul className="flex flex-col gap-2">
-            {results.map((g) => {
-              const added = games.some((mine) => mine.id === g.id);
-              return (
-                <li key={g.id} className="flex items-center justify-between px-3 py-1">
-                  {g.title}
-                  <button
-                    type="button"
-                    disabled={added}
-                    className={secondaryButtonClass}
-                    onClick={() => addGame(g.id)}
-                  >
-                    {added ? 'Added' : 'Add'}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        )}
+        <GameSearch
+          onPick={(g) => void addGame(g.id)}
+          isPicked={(g) => games.some((mine) => mine.id === g.id)}
+          error={gameError}
+        />
       </section>
     </Shell>
   );

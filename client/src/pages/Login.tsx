@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { loginRequestSchema } from '@faze/shared';
 import { Field, fieldErrors, inputClass, primaryButtonClass } from '../components/Field.tsx';
+import { messageOf } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 
 export function Login() {
@@ -28,7 +29,7 @@ export function Login() {
     try {
       await login(parsed.data.email, parsed.data.password);
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : 'Something went wrong.');
+      setFormError(messageOf(err));
     } finally {
       setSubmitting(false);
     }

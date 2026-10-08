@@ -1,6 +1,8 @@
 import { z } from 'zod';
 
 export const GROUP_PAGE_SIZE = 20;
+export const GROUP_MIN_MEMBERS = 2;
+export const GROUP_MAX_MEMBERS = 10;
 
 export const createGroupSchema = z
   .object({
@@ -9,7 +11,7 @@ export const createGroupSchema = z
     description: z.string().trim().max(1000).nullable().default(null),
     regionId: z.number().int().positive(),
     languageId: z.number().int().positive(),
-    maxMembers: z.number().int().min(2).max(10),
+    maxMembers: z.number().int().min(GROUP_MIN_MEMBERS).max(GROUP_MAX_MEMBERS),
     platformIds: z.array(z.number().int().positive()).min(1).max(10),
   })
   .strict()
