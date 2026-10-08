@@ -39,6 +39,7 @@ describe('GET /api/lookups', () => {
       expect.objectContaining({
         id: expect.any(Number),
         name: expect.any(String),
+        slug: expect.any(String),
       }),
     );
 
@@ -46,6 +47,7 @@ describe('GET /api/lookups', () => {
       expect.objectContaining({
         id: expect.any(Number),
         name: expect.any(String),
+        slug: expect.any(String),
       }),
     );
   });

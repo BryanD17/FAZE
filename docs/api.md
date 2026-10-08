@@ -59,10 +59,12 @@ Public endpoint used by profile and group forms. `200` returns:
 {
   "regions": [{ "id": 1, "name": "North America East", "code": "NA-East" }],
   "languages": [{ "id": 1, "name": "English", "code": "en" }],
-  "platforms": [{ "id": 1, "name": "PC" }],
-  "tags": [{ "id": 1, "name": "Competitive" }]
+  "platforms": [{ "id": 1, "name": "PC", "slug": "pc" }],
+  "tags": [{ "id": 2, "name": "Competitive", "slug": "competitive" }]
 }
 ```
+
+`GET /api/profile/me` lists platforms and tags by `slug`; use it to match them to these ids.
 
 ### `POST /api/auth/register`
 
