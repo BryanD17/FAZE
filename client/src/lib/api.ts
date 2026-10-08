@@ -25,6 +25,10 @@ export class ApiError extends Error {
   }
 }
 
+export function messageOf(err: unknown) {
+  return err instanceof Error ? err.message : 'Something went wrong.';
+}
+
 type Options = { method?: string; body?: unknown };
 
 function send(path: string, options: Options) {

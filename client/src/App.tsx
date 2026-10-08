@@ -1,8 +1,11 @@
 import type { ReactNode } from 'react';
 import { BrowserRouter, Navigate, NavLink, Route, Routes } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/auth.tsx';
+import { GroupDetail } from './pages/GroupDetail.tsx';
+import { Groups } from './pages/Groups.tsx';
 import { Home } from './pages/Home.tsx';
 import { Login } from './pages/Login.tsx';
+import { Matches } from './pages/Matches.tsx';
 import { Placeholder } from './pages/Placeholder.tsx';
 import { Profile } from './pages/Profile.tsx';
 import { Register } from './pages/Register.tsx';
@@ -78,9 +81,30 @@ export function App() {
               </RequireAuth>
             }
           />
-          <Route path="/groups" element={<Placeholder title="Groups" />} />
-          <Route path="/groups/:id" element={<Placeholder title="Group" />} />
-          <Route path="/matches" element={<Placeholder title="Matches" />} />
+          <Route
+            path="/groups"
+            element={
+              <RequireAuth>
+                <Groups />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/groups/:id"
+            element={
+              <RequireAuth>
+                <GroupDetail />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/matches"
+            element={
+              <RequireAuth>
+                <Matches />
+              </RequireAuth>
+            }
+          />
           <Route path="*" element={<Placeholder title="Page not found" />} />
         </Routes>
       </BrowserRouter>

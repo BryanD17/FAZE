@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerRequestSchema, type RegisterResponse } from '@faze/shared';
 import { Field, fieldErrors, inputClass, primaryButtonClass } from '../components/Field.tsx';
-import { api, ApiError } from '../lib/api.ts';
+import { api, ApiError, messageOf } from '../lib/api.ts';
 
 export function Register() {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ export function Register() {
       navigate('/login', { state: { notice } });
     } catch (err) {
       if (err instanceof ApiError && err.field) setErrors({ [err.field]: err.message });
-      else setFormError(err instanceof Error ? err.message : 'Something went wrong.');
+      else setFormError(messageOf(err));
     } finally {
       setSubmitting(false);
     }
