@@ -51,7 +51,7 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Groups API: create, list, view, join, leave                                                | ✅ nickayvy     |
 | Match query and `GET /api/matches`                                                         | ✅ Bryan        |
 | Group messages API                                                                         | ⬜ Alvin        |
-| Screens: login, profile, groups, matches, group detail                                     | ⬜ nickayvy     |
+| Screens: login, profile, groups, matches, group detail                                     | ✅ nickayvy     |
 | Demo data and tests                                                                        | ⬜ nickayvy     |
 | ER diagram and normalisation write-up                                                      | ✅ Bryan        |
 | Performance evidence: `EXPLAIN` before/after for three queries                             | ✅ Bryan        |

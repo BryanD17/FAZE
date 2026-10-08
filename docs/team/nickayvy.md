@@ -93,7 +93,7 @@ leave working with two different test users.
 removing members, transferring ownership, invite links. (The procedures for
 those exist; just do not call them.)
 
-### Task 2 — Website base (about 2 hours)
+### Task 2 — Website base ✅ done (PR #24)
 
 The old hero-page branch was started before the shared `client/` folder
 existed, so Git sees the same files twice and cannot merge them. The simplest
@@ -119,7 +119,7 @@ fix is a fresh branch that reuses its page.
 **You are done when:** the homepage keeps the old layout and wording, the page is dark, and
 clicking the links changes the URL without errors.
 
-### Task 3 — Login, register and profile screens (about 5 hours)
+### Task 3 — Login, register and profile screens ✅ done (PR #25)
 
 1. **Register page** (`/register`): email, password (at least 10 characters, one
    letter, one number), display name. Calls `POST /api/auth/register`. If the
@@ -149,7 +149,7 @@ in red text. No animations needed.
 **You are done when:** a new person can register, log in, fill in a profile,
 refresh the page and still see their data.
 
-### Task 4 — Groups, matches and group detail screens (about 6 hours)
+### Task 4 — Groups, matches and group detail screens ✅ done (PR #26; the chat box waits for Alvin's API)
 
 _Build this after Task 1 (your groups API). The match API already exists; its
 reply is described in [`../matchmaking.md`](../matchmaking.md)._
