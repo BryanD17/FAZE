@@ -11,11 +11,15 @@ export interface CodedLookupItem extends LookupItem {
   code: string;
 }
 
+export interface SluggedLookupItem extends LookupItem {
+  slug: string;
+}
+
 export interface Lookups {
   regions: CodedLookupItem[];
   languages: CodedLookupItem[];
-  platforms: LookupItem[];
-  tags: LookupItem[];
+  platforms: SluggedLookupItem[];
+  tags: SluggedLookupItem[];
 }
 
 interface LookupRow extends RowDataPacket {
@@ -25,6 +29,10 @@ interface LookupRow extends RowDataPacket {
 
 interface CodedLookupRow extends LookupRow {
   code: string;
+}
+
+interface SluggedLookupRow extends LookupRow {
+  slug: string;
 }
 
 export async function getLookups(): Promise<Lookups> {
@@ -40,14 +48,14 @@ export async function getLookups(): Promise<Lookups> {
       ORDER BY name ASC`,
   );
 
-  const [platforms] = await pool.query<LookupRow[]>(
-    `SELECT platform_id AS id, name
+  const [platforms] = await pool.query<SluggedLookupRow[]>(
+    `SELECT platform_id AS id, name, slug
        FROM platform
       ORDER BY name ASC`,
   );
 
-  const [tags] = await pool.query<LookupRow[]>(
-    `SELECT tag_id AS id, name
+  const [tags] = await pool.query<SluggedLookupRow[]>(
+    `SELECT tag_id AS id, name, slug
        FROM playstyle_tag
       ORDER BY name ASC`,
   );
@@ -55,7 +63,7 @@ export async function getLookups(): Promise<Lookups> {
   return {
     regions: regions.map(({ id, name, code }) => ({ id, name, code })),
     languages: languages.map(({ id, name, code }) => ({ id, name, code })),
-    platforms: platforms.map(({ id, name }) => ({ id, name })),
-    tags: tags.map(({ id, name }) => ({ id, name })),
+    platforms: platforms.map(({ id, name, slug }) => ({ id, name, slug })),
+    tags: tags.map(({ id, name, slug }) => ({ id, name, slug })),
   };
 }
