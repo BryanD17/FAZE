@@ -21,6 +21,7 @@ import { groupsRouter } from './routes/groups.js';
 import { healthRouter } from './routes/health.js';
 import { lookupsRouter } from './routes/lookups.js';
 import { matchesRouter } from './routes/matches.js';
+import { messagesRouter } from './routes/messages.js';
 import { profileRouter } from './routes/profile.js';
 import { reportsRouter } from './routes/reports.js';
 import { createAuthService } from './services/auth.service.js';
@@ -68,6 +69,7 @@ export function createApp(opts: AppOptions = {}) {
   app.use('/api/reports', reportsRouter);
   app.use('/api/profile', profileRouter);
   app.use('/api/games', gamesRouter);
+  app.use('/api/groups', messagesRouter);
   app.use('/api/groups', groupsRouter);
 
   app.use(notFound);

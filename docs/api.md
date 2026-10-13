@@ -194,14 +194,9 @@ not retype them. Unknown fields are rejected with `400 VALIDATION_ERROR`.
 
 `goal` is one of `casual, ranked, learning, completionist, content`.
 
-## Still to come (see `docs/SCOPE.md`)
-
-`GET` and `POST /api/groups/:id/messages` (Alvin).
-Each owner adds their own rows to this file when their PR lands.
-
 ## Groups
 
-All five routes need `Authorization: Bearer <token>`. Request shapes are
+All group routes need `Authorization: Bearer <token>`. Request shapes are
 `createGroupSchema` and `groupListQuerySchema` in `shared/src/schemas/group.ts`.
 Groups are always created open to join; there is no approval step. Archived
 groups (everyone left) behave as if they do not exist.
@@ -234,6 +229,46 @@ role, joinedAt }] }`. `myRole` is `null` when you are not a member.
 | 409    | `ALREADY_MEMBER`    | Join: you are already in the group                                                |
 | 409    | the procedure code  | Join: any other refusal from `sp_join_group`                                      |
 | 422    | `INVALID_REFERENCE` | Create: an id does not exist, or the game is not multiplayer (`field` says which) |
+
+## Messages
+
+Both routes require `Authorization: Bearer <token>` and the caller must be an
+active member of the group. Non-members receive `403 FORBIDDEN_GROUP_ROLE`.
+
+| Method | Path                       | Body / query                                       | Purpose                          |
+| ------ | -------------------------- | -------------------------------------------------- | -------------------------------- |
+| GET    | `/api/groups/:id/messages` | `limit` optional (default 50), `beforeId` optional | List group messages newest first |
+| POST   | `/api/groups/:id/messages` | `{ "body": "text" }`, 1–1000 characters after trim | Post a message                   |
+
+**GET** `200` →
+
+```json
+{
+  "messages": [
+    {
+      "messageId": 1,
+      "displayName": "PlayerOne",
+      "body": "Anyone on tonight?",
+      "createdAt": "2026-10-13T12:00:00.000Z"
+    }
+  ]
+}
+```
+
+Deleted messages are not returned.
+
+**POST** `201` returns the created message:
+
+```json
+{
+  "messageId": 1,
+  "displayName": "PlayerOne",
+  "body": "Anyone on tonight?",
+  "createdAt": "2026-10-13T12:00:00.000Z"
+}
+```
+
+A blank or whitespace-only body returns `400 VALIDATION_ERROR`.
 
 ## Matches
 
