@@ -184,9 +184,11 @@ groups and 200 messages.**
 4. Create **40 users** with believable names, a region, a platform or two,
    2–3 games from the **real** catalog (pick well-known multiplayer titles,
    e.g. search by name) and 3–6 weekly availability slots each.
-   - Use the real Express API or the repository code to create users so
-     passwords are hashed properly. Every demo user has the same password,
-     for example `DemoPass123`.
+   - Create users in the script itself, with `argon2` and the repository
+     functions (as `server/tests/` does), so passwords are hashed properly.
+     **Do not call `POST /api/auth/register` 40 times:** registration is limited
+     to 5 per 15 minutes per IP, so the sixth call gets a `429`. Every demo user
+     has the same password, for example `DemoPass123`.
    - Make sure a few people share the same game and region — that is what makes
      the matching demo interesting.
 5. Create **15 groups** by calling the `sp_create_group` procedure, owned by
