@@ -35,7 +35,7 @@ below for reference.
 
 **You are done when:** `curl localhost:4000/api/lookups` prints the four lists.
 
-### Task 2 — Messages API (about 3–4 hours)
+### Task 2 — Messages API ✅ done (PR #33)
 
 Group members can read and write messages in their group. Messages are stored in
 the existing `message` table.
@@ -100,10 +100,11 @@ the instructor wants it) one hosted copy.
 
 **Do not build:** Kubernetes, load balancers, monitoring, backups, CI deploys.
 
-### Task 4 — Group chat wiring (with nickayvy)
+### Task 4 — Group chat wiring ✅ done (checked 13 Oct)
 
-nickayvy builds the chat box on the group page. Help them wire it to your two
-endpoints and fix any server bug they find. No new work for you beyond that.
+The chat box on the group page talks to your two endpoints and works as built:
+Bryan checked it in a browser on 13 Oct (send, read back, and a message from
+another user appearing within seconds). Nothing further for you here.
 
 ## Not on your list any more
 

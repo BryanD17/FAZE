@@ -143,8 +143,8 @@ Measured with `EXPLAIN ANALYZE` on 20,000 users, 5,000 groups and 118,001 games
 
 - Passwords are hashed with **argon2id**; the hash is never logged or returned.
 - Every SQL value is a bound parameter; only repositories contain SQL.
-- Protected routes require a signed-in user (tested). Restricting group data to
-  members arrives with the groups and messages APIs.
+- Protected routes require a signed-in user (tested). Group messages are members-only:
+  a non-member, or someone who has left, gets `403` on both reading and posting (tested).
   **[TO ADD — nickayvy's one-page check, `docs/security.md`]**
 
 ## 8. Testing
@@ -173,7 +173,7 @@ five-step click-through will be in `docs/demo.md` **[TO ADD — nickayvy]**.
 
 ## 12. What is still open (honest list)
 
-- The groups API (PR #21) and the screens (PRs #24 to #26) are done. The messages API is in progress, so the chat box shows "not available yet".
+- The groups API (PR #21), the screens (PRs #24 to #26) and the messages API (PR #33) are done, and the chat works end to end. Demo data and screenshots are still to do.
 - RAWG cover art is not loaded; the website shows a placeholder.
 - Email sending is not built; accounts are active when they register.
 - Optional extras (sessions, ratings, an admin stats page) only if time allows.
