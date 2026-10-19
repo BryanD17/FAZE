@@ -149,14 +149,16 @@ Measured with `EXPLAIN ANALYZE` on 20,000 users, 5,000 groups and 118,001 games
 
 ## 8. Testing
 
-60 automated tests run in CI against a real MySQL (sign-in, profiles, the
-transaction helper, lookups and the match query). **[TO ADD — nickayvy's key
-database-integrity tests]**
+78 automated tests run in CI against a real MySQL: sign-in, profiles, lookups, the
+match query, groups (including the 8-people-one-seat race), messages and the
+stats route. A further set of key database-integrity tests is planned for
+Phase 2.
 
 ## 9. Run it yourself
 
-Setup is five commands in the [README](../README.md). The demo login and a
-five-step click-through will be in `docs/demo.md` **[TO ADD — nickayvy]**.
+Setup is five commands in the [README](../README.md). The demo logins and a
+five-step click-through are in [`demo.md`](demo.md): `npm run db:seed` creates 40
+users, 15 groups and 200 messages, and is safe to run again.
 
 ## 10. Screenshots
 
@@ -201,7 +203,8 @@ games.
 
 ## 12. What is still open (honest list)
 
-- The groups API (PR #21), the screens (PRs #24 to #26) and the messages API (PR #33) are done, and the chat works end to end. Demo data and screenshots are still to do.
+- Everything in the main user flow is built and checked end to end: groups API, screens, messages API, demo data and screenshots.
+- Still to do for Phase 2: the key database-integrity tests, the one-page security check, and a one-page guide to running one demo environment.
 - RAWG cover art is not loaded; the website shows a placeholder.
 - Email sending is not built; accounts are active when they register.
 - Optional extras (sessions, ratings, an admin stats page) only if time allows.

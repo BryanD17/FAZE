@@ -52,7 +52,8 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 | Match query and `GET /api/matches`                                                         | ✅ Bryan        |
 | Group messages API                                                                         | ✅ Alvin        |
 | Screens: login, profile, groups, matches, group detail                                     | ✅ nickayvy     |
-| Demo data and tests                                                                        | ⬜ nickayvy     |
+| Demo data (`npm run db:seed`) and screenshots                                              | ✅ nickayvy     |
+| About 15 key tests and the security page                                                   | ⬜ nickayvy     |
 | ER diagram and normalisation write-up                                                      | ✅ Bryan        |
 | Performance evidence: `EXPLAIN` before/after for three queries                             | ✅ Bryan        |
 | Phase 1 hand-in: report draft is written; waiting on teammates' paragraphs and screenshots | 🔄 Bryan        |

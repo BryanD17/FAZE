@@ -170,7 +170,7 @@ reply is described in [`../matchmaking.md`](../matchmaking.md)._
 **You are done when:** you can create a group, join it from a second account,
 and both accounts see each other's messages.
 
-### Task 5 — Demo data script (about 4 hours)
+### Task 5 — Demo data script ✅ done (PR #35)
 
 A script that fills an empty database with a small, realistic set of data, so
 the demo has something to show. **Small is the goal**: about **40 users, 15
@@ -209,7 +209,7 @@ groups and 200 messages.**
 **Do not build:** hundreds of users, thousands of messages, random-text
 generators, admin dashboards.
 
-### Task 6 — Screenshots (about 30 minutes)
+### Task 6 — Screenshots ✅ done (PR #36)
 
 Take one screenshot of each page and save them in `docs/screenshots/`. Bryan
 puts them in the report.
