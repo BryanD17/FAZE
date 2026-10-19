@@ -169,19 +169,19 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 
 ## Documentation
 
-| Doc                                              | What is in it                                                          |
-| ------------------------------------------------ | ---------------------------------------------------------------------- |
-| [`docs/SCOPE.md`](docs/SCOPE.md)                 | What we build, what we cut, route budget, match score, timetable       |
-| [`docs/team/`](docs/team/)                       | One step-by-step page per person                                       |
-| [`docs/er-diagram.md`](docs/er-diagram.md)       | The ER diagram, in two readable pictures                               |
-| [`docs/normalization.md`](docs/normalization.md) | How the data reaches 3NF, in plain English                             |
-| [`docs/matchmaking.md`](docs/matchmaking.md)     | How the match score works, with an example                             |
-| [`docs/performance.md`](docs/performance.md)     | `EXPLAIN` before/after for the three queries that matter               |
-| [`docs/phase1-report.md`](docs/phase1-report.md) | The Phase 1 report draft (items marked **[TO ADD]** wait on teammates) |
-| [`docs/schema.md`](docs/schema.md)               | Every table, the foreign keys, normalisation, procedures, triggers     |
-| [`docs/api.md`](docs/api.md)                     | Every endpoint and its JSON                                            |
-| [`docs/data.md`](docs/data.md)                   | Where the game data came from and how it was cleaned                   |
-| [`docs/decisions.md`](docs/decisions.md)         | Why we chose what we chose (dated)                                     |
+| Doc                                              | What is in it                                                      |
+| ------------------------------------------------ | ------------------------------------------------------------------ |
+| [`docs/SCOPE.md`](docs/SCOPE.md)                 | What we build, what we cut, route budget, match score, timetable   |
+| [`docs/team/`](docs/team/)                       | One step-by-step page per person                                   |
+| [`docs/er-diagram.md`](docs/er-diagram.md)       | The ER diagram, in two readable pictures                           |
+| [`docs/normalization.md`](docs/normalization.md) | How the data reaches 3NF, in plain English                         |
+| [`docs/matchmaking.md`](docs/matchmaking.md)     | How the match score works, with an example                         |
+| [`docs/performance.md`](docs/performance.md)     | `EXPLAIN` before/after for the three queries that matter           |
+| [`docs/phase1-report.md`](docs/phase1-report.md) | The Phase 1 report                                                 |
+| [`docs/schema.md`](docs/schema.md)               | Every table, the foreign keys, normalisation, procedures, triggers |
+| [`docs/api.md`](docs/api.md)                     | Every endpoint and its JSON                                        |
+| [`docs/data.md`](docs/data.md)                   | Where the game data came from and how it was cleaned               |
+| [`docs/decisions.md`](docs/decisions.md)         | Why we chose what we chose (dated)                                 |
 
 Still to be written by their owners: `docs/security.md`, `docs/deployment.md`.
 

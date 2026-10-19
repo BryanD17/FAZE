@@ -3,10 +3,8 @@
 **CS 514: Database Theory and Implementation — Fall 2026**
 Team: Bryan Djenabia, Alvin Hoang, nickayvy
 
-> **Status of this draft.** Everything below is taken from the repository and
-> the running database. Items marked **[TO ADD]** depend on a teammate's work
-> that is not merged yet; they are placeholders, not claims. Due **19 Oct 2026,
-> 11:59 pm**.
+> **Status.** Everything below is taken from the repository and the running
+> database. Due **19 Oct 2026, 11:59 pm**.
 
 ## 1. What FAZE is
 
@@ -145,7 +143,7 @@ Measured with `EXPLAIN ANALYZE` on 20,000 users, 5,000 groups and 118,001 games
 - Every SQL value is a bound parameter; only repositories contain SQL.
 - Protected routes require a signed-in user (tested). Group messages are members-only:
   a non-member, or someone who has left, gets `403` on both reading and posting (tested).
-  **[TO ADD — nickayvy's one-page check, `docs/security.md`]**
+  A longer security check is planned for Phase 2.
 
 ## 8. Testing
 
@@ -195,11 +193,17 @@ games.
 
 ## 11. Who did what
 
-| Person   | Part                                                                                                                                   | Paragraph                              |
-| -------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| Bryan    | Project setup and review, schema and migration runner, game data import, matching query, performance evidence, ER diagram, this report | This report                            |
-| Alvin    | Sign-in, profiles (region, platform, games, tags, availability), lookup lists, messages API                                            | **[TO ADD — Alvin, 3–4 sentences]**    |
-| nickayvy | Groups API, every screen, demo data, tests, security check                                                                             | **[TO ADD — nickayvy, 3–4 sentences]** |
+### Bryan
+
+I set up the project, the automatic checks and the review process, and I designed the database: 29 tables, the migration runner, 6 views, 6 stored procedures and 7 triggers. I loaded 118,001 real games from a public Steam dataset, built the sign-in system, and wrote the matching query, which ranks groups with one SQL score. I also drew the ER diagram, wrote the normalisation explanation, measured the main queries with EXPLAIN, and reviewed and merged the team's work. The trickiest part was the matching query. A group has no schedule of its own, so I used the average time each member shares with the person, and a new index cut the query time from 295 ms to 164 ms.
+
+### Alvin
+
+I built the profile API, which saves a person's region, platforms, play styles, favourite games and weekly availability. Availability is entered in the person's own time zone and converted to UTC before it is saved, including slots that run past midnight, so people in different time zones can be compared fairly. I also added the lookup lists that fill the drop-down menus, and the group messages API, which lets only members of a group read and post messages. Each of these has automated tests, including checks that someone outside the group is refused. The most careful work was the time zone conversion.
+
+### nickayvy
+
+I built the groups API that handled creating, listing, viewing, joining and leaving groups, with joins going through a stored procedure that locks the group's row so a group can never go over its limit. On the website, I built the base, the login, register and profile screens, the groups, matches and group detail screens, and the live chat box. I also wrote the demo data script and took the report screenshots. The trickiest part for me was the demo data script. MySQL does not run triggers on rows deleted by a foreign key cascade, so clearing the old demo data would quietly leave the stored member counts wrong unless the memberships were deleted first.
 
 ## 12. What is still open (honest list)
 
@@ -211,13 +215,16 @@ games.
 
 ---
 
-## Appendix — draft of the discussion post
+## Appendix: draft of the discussion post
 
-> **FAZE — gaming group finder.** We built a MySQL-backed app that ranks groups
-> for a gamer using one SQL score: same game, same region, and overlapping
-> weekly availability. The schema is normalised to 3NF with one deliberate,
-> trigger-protected denormalisation. We loaded 118,001 real Steam games, and we
-> prove the "last seat" race is safe: eight simultaneous joins for one seat give
-> exactly one winner, every time. Indexes were chosen with `EXPLAIN ANALYZE`
-> evidence (for example game search 81.6 ms → 0.21 ms). **[Each teammate adds
-> one sentence about their lane before posting.]**
+> **FAZE: gaming group finder.** We built a MySQL-backed web app that ranks
+> groups for a gamer using one SQL score: same game, same region, and
+> overlapping weekly availability. The schema is normalised to 3NF with one
+> deliberate, trigger-protected exception, the group member count. We loaded
+> 118,001 real Steam games, and we show that the "last seat" race is safe: eight
+> simultaneous joins for one seat give exactly one winner, every time. Indexes
+> were chosen using `EXPLAIN ANALYZE` evidence, for example game search went from
+> 81.6 ms to 0.21 ms. Alvin built the profile and messages APIs, including the
+> time zone conversion for availability. nickayvy built the groups API and the
+> website, plus the demo data and the screenshots. Bryan designed the database,
+> the matching query and the performance work.
