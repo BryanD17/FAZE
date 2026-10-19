@@ -160,8 +160,36 @@ five-step click-through will be in `docs/demo.md` **[TO ADD — nickayvy]**.
 
 ## 10. Screenshots
 
-**[TO ADD — nickayvy: login, profile, groups, matches, group detail; save in
-`docs/screenshots/`]**
+Taken with the demo data ([`demo.md`](demo.md)), signed in as demo users.
+
+**Home**
+
+![Home page](screenshots/home.png)
+
+**Register and log in**
+
+![Register page](screenshots/register.png)
+
+![Login page](screenshots/login.png)
+
+**Profile:** region, platform, play styles, weekly availability and favourite
+games.
+
+![Profile page](screenshots/profile.png)
+
+**Groups:** filtered to Europe West; the last group is full (4 / 4).
+
+![Group list](screenshots/groups.png)
+
+**Matches:** open groups ranked by the SQL score, with the reason for each.
+
+![Matches page](screenshots/matches.png)
+
+**Group detail and chat:** members, the Leave button, and the group's messages.
+
+![Group detail page](screenshots/group-detail.png)
+
+![Group chat](screenshots/group-chat.png)
 
 ## 11. Who did what
 
