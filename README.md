@@ -178,6 +178,7 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 | [`docs/matchmaking.md`](docs/matchmaking.md)     | How the match score works, with an example                         |
 | [`docs/performance.md`](docs/performance.md)     | `EXPLAIN` before/after for the three queries that matter           |
 | [`docs/phase1-report.md`](docs/phase1-report.md) | The Phase 1 report                                                 |
+| [`docs/phase1/`](docs/phase1/)                   | Phase 1 hand-in: the product document PDF and the website text     |
 | [`docs/schema.md`](docs/schema.md)               | Every table, the foreign keys, normalisation, procedures, triggers |
 | [`docs/api.md`](docs/api.md)                     | Every endpoint and its JSON                                        |
 | [`docs/data.md`](docs/data.md)                   | Where the game data came from and how it was cleaned               |
