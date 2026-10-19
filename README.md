@@ -182,8 +182,7 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 | [`docs/data.md`](docs/data.md)                   | Where the game data came from and how it was cleaned                   |
 | [`docs/decisions.md`](docs/decisions.md)         | Why we chose what we chose (dated)                                     |
 
-Still to be written by their owners: `docs/security.md`, `docs/deployment.md`,
-`docs/demo.md`.
+Still to be written by their owners: `docs/security.md`, `docs/deployment.md`.
 
 ## What is in the repository
 
@@ -195,7 +194,7 @@ db/
   migrations/ numbered SQL files — the only way the schema changes
   scripts/    migrate, rollback, reset, verify
   etl/        the game data import
-  seeds/      demo data (coming)
+  seeds/      demo data (npm run db:seed, see docs/demo.md)
 docs/         all written documents
 .github/      CI checks, pull request template, reviewers
 ```
