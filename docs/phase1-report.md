@@ -21,7 +21,7 @@ well-designed database answers the question better than a chat channel does.
 
 ## 2. Database design
 
-- **ER diagram:** [`er-diagram.md`](er-diagram.md) (two pictures, generated from
+- **ER diagram:** [`er-diagram.md`](er-diagram.md) (three pictures, generated from
   the real tables). 29 application tables, 41 foreign keys, 21 `CHECK`
   constraints. Every foreign key has a deliberately chosen `ON DELETE` rule,
   explained in [`schema.md`](schema.md) §3.
