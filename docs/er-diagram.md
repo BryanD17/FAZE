@@ -1,7 +1,7 @@
 # ER diagram
 
 FAZE has **29 tables** for the application (plus 4 temporary staging tables and
-the migration log). 20 are drawn below in two pictures so each one stays
+the migration log). 20 are drawn below in three pictures so each one stays
 readable, and the 9 housekeeping tables are listed after them. Every
 box and line comes from the real database (`information_schema`), and the full
 column list for every table is in [`schema.md`](schema.md).
@@ -19,7 +19,11 @@ play-style tags and games they play. Tables ending in `_platform`, `_tag`,
 (a person plays many games, a game is played by many people) into two
 one-to-many ones.
 
-![People, profiles and games](img/er-people.png)
+It is drawn as two pictures so the text stays large enough to read.
+
+**People and profiles**
+
+![People, profiles and availability](img/er-profiles.png)
 
 ```mermaid
 erDiagram
@@ -31,12 +35,6 @@ erDiagram
     platform ||--o{ user_platform : ""
     user ||--o{ user_tag : "describes self with"
     playstyle_tag ||--o{ user_tag : ""
-    user ||--o{ user_game : owns
-    game ||--o{ user_game : ""
-    game ||--o{ game_genre : ""
-    genre ||--o{ game_genre : ""
-    game ||--o{ game_platform : "runs on"
-    platform ||--o{ game_platform : ""
 
     user {
         int user_id PK
@@ -57,6 +55,24 @@ erDiagram
         int day_of_week
         int start_minute "UTC"
         int end_minute "UTC"
+    }
+```
+
+**Games**
+
+![Games, genres and platforms](img/er-games.png)
+
+```mermaid
+erDiagram
+    user ||--o{ user_game : owns
+    game ||--o{ user_game : ""
+    game ||--o{ game_genre : ""
+    genre ||--o{ game_genre : ""
+    game ||--o{ game_platform : "runs on"
+    platform ||--o{ game_platform : ""
+
+    user {
+        int user_id PK
     }
     user_game {
         int user_id PK, FK
@@ -147,6 +163,7 @@ erDiagram
 
 ## Redrawing the pictures
 
-The sources are `img/er-people.mmd` and `img/er-groups.mmd` (Mermaid text). Edit
+The sources are `img/er-profiles.mmd`, `img/er-games.mmd` and `img/er-groups.mmd`
+(Mermaid text). Edit
 the text, then paste it into <https://mermaid.live> to export a new PNG. The
 Mermaid blocks above also render directly on GitHub.

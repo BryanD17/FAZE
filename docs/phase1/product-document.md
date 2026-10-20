@@ -57,16 +57,21 @@ bound parameters; there is no ORM.
 
 ## 2.2 ER diagram
 
-The diagram is split into two pictures so it stays readable. The first shows
-people: users, profiles, the games they own, their platforms, play styles and
-weekly availability.
+The diagram is split into three pictures so the text stays readable. Each one
+has its own page. The first shows people: users, profiles, weekly availability,
+platforms and play styles.
 
-![ER diagram, part 1: people, profiles, games and availability](../img/er-people.png)
+![ER diagram, part 1: people, profiles and availability](../img/er-profiles.png){.er}
 
-The second shows groups: the group itself, its members, messages, sessions and
+The second shows games: the games people own, and each game's genres and
+platforms.
+
+![ER diagram, part 2: games, genres and platforms](../img/er-games.png){.er}
+
+The third shows groups: the group itself, its members, messages, sessions and
 ratings.
 
-![ER diagram, part 2: groups, members, messages and sessions](../img/er-groups.png)
+![ER diagram, part 3: groups, members, messages and sessions](../img/er-groups.png){.er}
 
 ## 2.3 Normalisation
 

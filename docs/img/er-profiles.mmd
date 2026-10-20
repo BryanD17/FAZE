@@ -7,12 +7,6 @@ erDiagram
     platform ||--o{ user_platform : ""
     user ||--o{ user_tag : "describes self with"
     playstyle_tag ||--o{ user_tag : ""
-    user ||--o{ user_game : owns
-    game ||--o{ user_game : ""
-    game ||--o{ game_genre : ""
-    genre ||--o{ game_genre : ""
-    game ||--o{ game_platform : "runs on"
-    platform ||--o{ game_platform : ""
 
     user {
         int user_id PK
@@ -33,17 +27,4 @@ erDiagram
         int day_of_week
         int start_minute "UTC"
         int end_minute "UTC"
-    }
-    user_game {
-        int user_id PK, FK
-        int game_id PK, FK
-        int rank_tier
-        enum goal
-        bool is_primary
-    }
-    game {
-        int game_id PK
-        string title
-        string slug UK
-        bool is_multiplayer
     }
