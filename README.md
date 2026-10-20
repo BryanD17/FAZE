@@ -159,7 +159,8 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 ## How we work together
 
 - **One task = one branch = one pull request.** Never push straight to `main`.
-- **Bryan reviews and merges.** Please do not merge your own pull request.
+- **Bryan reviews and merges.** nickayvy may merge his own pull requests once
+  both checks are green; everyone else waits for Bryan.
 - **Show real output** (test results, a JSON reply, a screenshot) in your pull
   request. "It works" is not enough.
 - Questions go in Discord `#project-ideas`; pull request links in `#github-links`.

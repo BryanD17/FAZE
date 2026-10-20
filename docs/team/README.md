@@ -74,6 +74,8 @@ If something fails, copy the **whole** error message into Discord
    what you did, how you checked it, and paste a little proof (see below).
 8. **Wait for the two green checks, then for Bryan.** Bryan reviews and merges.
    Please **do not merge your own PR** and **never push straight to `main`.**
+   (nickayvy is the one exception: he may merge his own PRs once both checks
+   are green, without waiting for Bryan.)
 
 **If your PR says it has conflicts:**
 

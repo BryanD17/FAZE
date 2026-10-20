@@ -6,7 +6,12 @@ demo data, so a person can sign up, find a group, join it and talk in it.
 You are taking over the work that was first planned for three people, so this
 page puts the tasks in the order that unblocks everybody else. Do them top to
 bottom. First read the shared workflow in [README.md](README.md) (branches, pull
-requests and local setup). Bryan reviews and merges every pull request.
+requests and local setup).
+
+**You may merge your own pull requests.** Once both checks on your PR are
+green, press **Squash and merge** yourself; you do not need to wait for Bryan.
+Still never push straight to `main`, and still put real proof (test output, a
+screenshot) in the PR so the rest of us can see what changed.
 
 ## What is already done for you
 
