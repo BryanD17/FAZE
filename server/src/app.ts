@@ -37,6 +37,7 @@ export interface AppOptions {
 
 export function createApp(opts: AppOptions = {}) {
   const app = express();
+  if (config.trustProxy !== undefined) app.set('trust proxy', config.trustProxy);
 
   app.use(helmet());
 

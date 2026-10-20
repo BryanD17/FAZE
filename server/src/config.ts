@@ -61,6 +61,12 @@ const envSchema = z.object({
   // The refresh cookie is `Secure`. Browsers accept that on http://localhost
   // (Chrome, Edge, Firefox) but Safari does not; set false to develop in Safari.
   COOKIE_SECURE: z.enum(['true', 'false']).optional(),
+
+  // How many proxies sit in front of the API when it is hosted (for example
+  // Vercel's rewrite plus Render's load balancer). Express then reads the
+  // visitor's real IP from X-Forwarded-For, so the sign-up rate limit counts
+  // each visitor separately. Leave unset locally.
+  TRUST_PROXY: z.coerce.number().int().min(0).max(5).optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
@@ -85,6 +91,7 @@ export const config = {
   port: env.PORT,
   clientOrigin: env.CLIENT_ORIGIN,
   logLevel: env.LOG_LEVEL,
+  trustProxy: env.TRUST_PROXY,
   db: {
     host: env.DB_HOST,
     port: env.DB_PORT,
