@@ -28,6 +28,7 @@ export const pool: Pool = mysql.createPool({
   user: config.db.user,
   password: config.db.password,
   database: config.db.database,
+  ssl: config.db.sslCa ? { ca: config.db.sslCa } : undefined,
   waitForConnections: true,
   // Tuned against a concurrency measurement in AGENT 16; 10 is the documented
   // starting point and is well inside a free-tier provider's connection cap.
