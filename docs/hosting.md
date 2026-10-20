@@ -32,17 +32,16 @@ this part once.
 3. In the Render dashboard click **New +**, then **Blueprint**.
 4. Pick the **FAZE** repository and the **main** branch. Render reads
    `render.yaml` and shows one service called **faze-api** on the free plan.
-5. Render asks for three values that are not in the file. Get them from Nick
+5. Render asks for two values that are not in the file. Get them from Nick
    by direct message:
 
-   | Setting         | What to paste                                                                                                  |
-   | --------------- | -------------------------------------------------------------------------------------------------------------- |
-   | `DB_PASSWORD`   | The Aiven `avnadmin` password                                                                                  |
-   | `DB_SSL_CA`     | The Aiven **CA certificate**, the whole text from `-----BEGIN CERTIFICATE-----` to `-----END CERTIFICATE-----` |
-   | `CLIENT_ORIGIN` | The Vercel website address, for example `https://faze.vercel.app` (no `/` at the end)                          |
+   | Setting       | What to paste                                                                                                                            |
+   | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+   | `DB_PASSWORD` | The Aiven `avnadmin` password                                                                                                            |
+   | `DB_SSL_CA`   | The Aiven **CA certificate**, the whole text from `-----BEGIN CERTIFICATE-----` to `-----END CERTIFICATE-----`, without quotes around it |
 
-   If Nick does not have the Vercel address yet, type
-   `https://example.com` for now and change it later under **Environment**.
+   `CLIENT_ORIGIN` (`https://faze-alpha.vercel.app`) and `TRUST_PROXY` (`2`)
+   are already set in `render.yaml`.
 
 6. Click **Apply**. The first build takes a few minutes. Watch it under the
    service's **Logs** tab until it says `FAZE API listening`.
@@ -70,13 +69,11 @@ to wake it up. Open the site a couple of minutes before a demo or presentation.
    ```
 
 2. Open a pull request, and redeploy on Vercel once it is merged.
-3. Check that `CLIENT_ORIGIN` on Render matches the Vercel address exactly.
-4. Set `TRUST_PROXY` on Render (under **Environment**) to the number of proxies
-   in front of the API, so the sign-up limit counts each visitor separately.
-   Start with `2` (Vercel plus Render's load balancer), then check: two people
-   on different networks should each be able to register 5 times in 15
-   minutes, without blocking each other.
-5. Test the whole flow on the live site (see the GitHub issue for the list).
+3. `CLIENT_ORIGIN` and `TRUST_PROXY` come from `render.yaml`. To check
+   `TRUST_PROXY=2`, two people on different networks should each be able to
+   register without hitting "Too many requests" from the other's attempts. If
+   they do block each other, try `3` under **Environment** on Render.
+4. Test the whole flow on the live site (see the GitHub issue for the list).
 
 ## Part 3. If something goes wrong
 
