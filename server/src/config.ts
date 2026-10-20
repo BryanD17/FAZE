@@ -28,6 +28,9 @@ const envSchema = z.object({
   DB_PASSWORD: z.string().default('root'),
   DB_NAME: z.string().min(1).default('faze'),
   DB_NAME_TEST: z.string().min(1).default('faze_test'),
+  // PEM text of the provider's CA certificate. Set it and connections use
+  // verified TLS (hosted MySQL such as Aiven); leave it unset for local MySQL.
+  DB_SSL_CA: z.string().optional(),
 
   // Signs the 15-minute access token. Required, and long enough that it cannot
   // be guessed: a short secret would let anyone forge a token for any user.
@@ -90,6 +93,7 @@ export const config = {
     // Tests run against a separate database so a `db:reset` can never wipe
     // someone's development data mid-suite.
     database: env.NODE_ENV === 'test' ? env.DB_NAME_TEST : env.DB_NAME,
+    sslCa: env.DB_SSL_CA,
   },
   auth: {
     accessSecret: env.JWT_ACCESS_SECRET,

@@ -29,6 +29,7 @@ export const dbConfig = {
     process.env.NODE_ENV === 'test'
       ? (process.env.DB_NAME_TEST ?? 'faze_test')
       : (process.env.DB_NAME ?? 'faze'),
+  ssl: process.env.DB_SSL_CA ? { ca: process.env.DB_SSL_CA } : undefined,
 };
 
 /**
@@ -58,6 +59,7 @@ export async function connectServerOnly() {
     port: dbConfig.port,
     user: dbConfig.user,
     password: dbConfig.password,
+    ssl: dbConfig.ssl,
     multipleStatements: true,
   });
 }

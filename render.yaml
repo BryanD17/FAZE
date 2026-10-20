@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: faze-api
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build --workspace=@faze/shared && npm run build --workspace=@faze/server
+    startCommand: npm start --workspace=@faze/server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        value: mysql-1540ad1-faze.b.aivencloud.com
+      - key: DB_PORT
+        value: '14820'
+      - key: DB_USER
+        value: avnadmin
+      - key: DB_NAME
+        value: faze
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_SSL_CA
+        sync: false
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: CLIENT_ORIGIN
+        sync: false
+      - key: ALLOW_UNVERIFIED_LOGIN
+        value: 'true'
+      - key: DEMO_MODE
+        value: 'true'

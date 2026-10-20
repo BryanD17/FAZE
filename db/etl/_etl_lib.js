@@ -28,6 +28,7 @@ export async function connect() {
       process.env.NODE_ENV === 'test'
         ? (process.env.DB_NAME_TEST ?? 'faze_test')
         : (process.env.DB_NAME ?? 'faze'),
+    ssl: process.env.DB_SSL_CA ? { ca: process.env.DB_SSL_CA } : undefined,
     timezone: 'Z',
   });
 }
