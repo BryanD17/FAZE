@@ -38,36 +38,36 @@ written on one page: **[`docs/SCOPE.md`](docs/SCOPE.md)**.
 
 ---
 
-## Where the project stands (2 Oct 2026)
+## Where the project stands (23 Nov 2026)
 
-| Part                                                                                       | Status          |
-| ------------------------------------------------------------------------------------------ | --------------- |
-| Project setup, CI, review rules                                                            | ✅ Done         |
-| Database: 29 tables, migrations, normalisation write-up (ER diagram: `docs/er-diagram.md`) | ✅ Done         |
-| Real game data: 118,001 games imported with genres and platforms                           | ✅ Done         |
-| Database programming: 6 views, 6 stored procedures, 7 triggers, indexes                    | ✅ Done         |
-| Register, log in, log out (passwords hashed with argon2id)                                 | ✅ Done         |
-| Profiles: region, platform, games, tags, availability                                      | ✅ Done (Alvin) |
-| Groups API: create, list, view, join, leave                                                | ✅ nickayvy     |
-| Match query and `GET /api/matches`                                                         | ✅ Bryan        |
-| Group messages API                                                                         | ✅ Alvin        |
-| Screens: login, profile, groups, matches, group detail                                     | ✅ nickayvy     |
-| Demo data (`npm run db:seed`) and screenshots                                              | ✅ nickayvy     |
-| About 15 key tests and the security page                                                   | ⬜ nickayvy     |
-| ER diagram and normalisation write-up                                                      | ✅ Bryan        |
-| Performance evidence: `EXPLAIN` before/after for three queries                             | ✅ Bryan        |
-| Phase 1 hand-in: report draft is written; waiting on teammates' paragraphs and screenshots | 🔄 Bryan        |
+**Phase 1 was handed in on 19 Oct. Phase 2 is due on 7 Dec.** The whole plan,
+with owners and dates, is in **[`docs/PHASE2.md`](docs/PHASE2.md)**.
+
+| Part                                                                         | Status                      |
+| ---------------------------------------------------------------------------- | --------------------------- |
+| Database: 29 tables, 6 views, 6 stored procedures, 7 triggers, 12 migrations | ✅ Done (Bryan)             |
+| Real game data: 118,001 Steam games                                          | ✅ Done (Bryan)             |
+| Sign-in, profiles with time zones, lookups, group messages                   | ✅ Done (Alvin, Bryan)      |
+| Groups API, all screens, live chat, demo data                                | ✅ Done (nickayvy)          |
+| Match query, ER diagram, normalisation, `EXPLAIN` evidence                   | ✅ Done (Bryan)             |
+| Hosting: Vercel website, Render API, Aiven MySQL                             | ✅ Set up (nickayvy)        |
+| Phase 1 hand-in: report, product PDF, deck, website                          | ✅ Handed in                |
+| **Phase 2:** sessions and ratings, group editing, stats page                 | ⬜ Alvin (#48, #49, #51)    |
+| **Phase 2:** availability grid, score breakdown, polish, new look            | ⬜ nickayvy (#52–#54)       |
+| **Phase 2:** key tests, security page, live-site check                       | ⬜ nickayvy (#19, #43)      |
+| **Phase 2:** baselines, scaling and concurrency experiments with charts      | ⬜ Bryan (#55), Alvin (#50) |
+| **Phase 2:** literature review, error analysis, final document and deck      | ⬜ Bryan (#56, #57)         |
 
 ## Who does what
 
 Every person has their own step-by-step page. **Open yours and follow it from the
 top.** Do not start a task that is not on your page without asking first.
 
-| Person                            | Main job                                                                                        | Your page                                        |
-| --------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| **Bryan Djenabia** (project lead) | Match query, `EXPLAIN` evidence, ER diagram, both hand-ins, reviewing and merging pull requests | [`docs/team/bryan.md`](docs/team/bryan.md)       |
-| **Alvin Hoang**                   | Group messages API, one demo environment                                                        | [`docs/team/alvin.md`](docs/team/alvin.md)       |
-| **nickayvy**                      | Groups API, all the screens, demo data, a small set of tests, a short security check            | [`docs/team/nickayvy.md`](docs/team/nickayvy.md) |
+| Person                            | Phase 2 job                                                                         | Your page                                        |
+| --------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **Bryan Djenabia** (project lead) | Experiments and baselines, literature review, final document, deck, hand-in         | [`docs/team/bryan.md`](docs/team/bryan.md)       |
+| **Alvin Hoang**                   | Sessions and ratings, group editing, stats page, concurrency experiment, demo guide | [`docs/team/alvin.md`](docs/team/alvin.md)       |
+| **nickayvy**                      | Availability grid, match card polish, new look, key tests, security page, live site | [`docs/team/nickayvy.md`](docs/team/nickayvy.md) |
 
 The shared steps for branches, pull requests and setup are in
 [`docs/team/README.md`](docs/team/README.md).
@@ -148,19 +148,22 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 
 ## Timetable
 
-| Dates          | Goal                                                                                                                                              |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2 – 8 Oct      | nickayvy builds the groups API and the website base. Bryan builds the match query.                                                                |
-| 9 – 15 Oct     | nickayvy builds the main screens and the demo data script. Alvin builds messages. Bryan writes the ER diagram and normalisation text.             |
-| 16 – 19 Oct    | **Phase 1 due 19 Oct, 11:59 pm** (discussion post 50 pts + submission link 100 pts). Bryan submits; everyone adds one paragraph about their part. |
-| 20 Oct – 6 Dec | Chat screen, one demo environment, optional extras, screenshots, polish.                                                                          |
-| 7 Dec          | **Phase 2 due, 11:59 pm.**                                                                                                                        |
+| Dates           | Goal                                                                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2 – 8 Oct       | nickayvy builds the groups API and the website base. Bryan builds the match query.                                                                |
+| 9 – 15 Oct      | nickayvy builds the main screens and the demo data script. Alvin builds messages. Bryan writes the ER diagram and normalisation text.             |
+| 16 – 19 Oct     | **Phase 1 due 19 Oct, 11:59 pm** (discussion post 50 pts + submission link 100 pts). Bryan submits; everyone adds one paragraph about their part. |
+| 20 Oct – 22 Nov | Hosting set up on Vercel, Render and Aiven.                                                                                                       |
+| 23 Nov – 1 Dec  | Phase 2 features, built and merged (**feature freeze Tue 1 Dec**).                                                                                |
+| 2 – 6 Dec       | Experiments, final screenshots, final document and deck, full demo check on Sun 6 Dec.                                                            |
+| 7 Dec           | **Phase 2 due, 11:59 pm.**                                                                                                                        |
 
 ## How we work together
 
 - **One task = one branch = one pull request.** Never push straight to `main`.
 - **Bryan reviews and merges.** nickayvy may merge his own pull requests once
   both checks are green; everyone else waits for Bryan.
+- **Feature freeze on Tue 1 Dec.** After that, only bug fixes go into `main`.
 - **Show real output** (test results, a JSON reply, a screenshot) in your pull
   request. "It works" is not enough.
 - Questions go in Discord `#project-ideas`; pull request links in `#github-links`.
@@ -172,6 +175,7 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 
 | Doc                                              | What is in it                                                          |
 | ------------------------------------------------ | ---------------------------------------------------------------------- |
+| [`docs/PHASE2.md`](docs/PHASE2.md)               | **The Phase 2 plan: tasks, owners, dates**                             |
 | [`docs/SCOPE.md`](docs/SCOPE.md)                 | What we build, what we cut, route budget, match score, timetable       |
 | [`docs/team/`](docs/team/)                       | One step-by-step page per person                                       |
 | [`docs/er-diagram.md`](docs/er-diagram.md)       | The ER diagram, in two readable pictures                               |
