@@ -13,6 +13,26 @@ green, press **Squash and merge** yourself; you do not need to wait for Bryan.
 Still never push straight to `main`, and still put real proof (test output, a
 screenshot) in the PR so the rest of us can see what changed.
 
+## Phase 2: what to do now (due Mon 7 Dec)
+
+The full plan is in [`../PHASE2.md`](../PHASE2.md). Each issue has the
+step-by-step details. Your part, in order:
+
+1. **Finish the live site** (#43, about 2 hours): test the whole flow on
+   Vercel, make sure the demo data is on Aiven, and add the link to the README.
+2. **Match card score breakdown, loading, empty and error states, phone layout**
+   (#52, half a day, merged by **Tue 1 Dec**).
+3. **Visual weekly availability grid** (#53, about 1 day, Tue 1 Dec).
+4. **The FAZE look**: navy and violet colours, Space Grotesk and DM Sans, logo
+   (#54, half a day, Tue 1 Dec). Then retake the screenshots by **Thu 3 Dec**.
+5. **Key tests, security page, data write-up** (#19, Tasks 7 to 9 below,
+   about 7 hours, before Fri 4 Dec).
+
+Feature freeze is **Tue 1 Dec**: after that, only bug fixes. You may merge your
+own PRs once both CI checks are green.
+
+---
+
 ## What is already done for you
 
 - **Database:** all tables, the stored procedures `sp_create_group`,

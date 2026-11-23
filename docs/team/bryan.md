@@ -6,6 +6,24 @@ fast and correct, and turn everything into the two hand-ins.
 First read the shared workflow in [README.md](README.md). You are also the
 reviewer and the only person who merges pull requests.
 
+## Phase 2: what to do now (due Mon 7 Dec)
+
+The full plan is in [`../PHASE2.md`](../PHASE2.md). Your part, in order:
+
+1. **Baselines and the scaling experiment** (#55, about 1 day, results by Wed 2 Dec).
+   Flat table compared with our schema, scoring in app code compared with SQL,
+   stored count compared with `COUNT(*)`, and the match query at 1k to 100k users,
+   with charts in a new `docs/experiments.md`.
+2. **Literature review and error analysis** (#56, half a day, draft by Thu 3 Dec).
+3. **Final document, deck, backup demo video, website** (#57, 1.5 days, Mon 7 Dec).
+4. **Review and merge** Alvin's PRs as they come in (nickayvy merges his own).
+   Feature freeze is **Tue 1 Dec**.
+5. **Housekeeping** (#23, in #57): delete merged branches, protect `main` with
+   the two CI checks and no approval rule, remove the three former
+   collaborators, and reset the Aiven database password.
+
+---
+
 ## Already done
 
 - ✅ Project scaffold, CI, and review rules.
@@ -13,7 +31,7 @@ reviewer and the only person who merges pull requests.
   triggers, views, and the login system.
 - ✅ Branch protection is **not** done yet — see step 1 below.
 
-## Your tasks, in order
+## Phase 1 tasks (done, kept for reference)
 
 ### Step 1 — Protect `main` (10 minutes, you only)
 
