@@ -63,6 +63,10 @@ that the scan grows with the table and the index does not.
 
 ## 2. The match query
 
+> **Phase 2 update.** The match query was rewritten after the scaling
+> experiment; it now takes 209 ms at 100,000 users instead of 941 ms. See
+> [`experiments.md`](experiments.md). The plans below are the Phase 1 form.
+
 The query is explained in [`matchmaking.md`](matchmaking.md). Its expensive part
 is working out, for every group, how many hours its members are free at the same
 time as you.

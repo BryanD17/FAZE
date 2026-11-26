@@ -77,6 +77,15 @@ interface MatchRecord extends RowDataPacket {
  *
  * Not offered: groups that are full, not open to join, or that the person is
  * already in. Ties are broken by the most recently active group.
+ *
+ * `STRAIGHT_JOIN` in `shared` keeps the join order: the person's few slots
+ * first, so the availability index finds only the slots that overlap them.
+ * Left to itself, MySQL starts from every active member instead, which is
+ * about 3.5 times slower at 100,000 users. For the same reason the full group
+ * card (game, owner, platforms) is joined only to the top rows, and `MERGE(c)`
+ * stops MySQL from building the card view for every group first. Together
+ * these took the query from 941 ms to 209 ms at 100,000 users
+ * (docs/experiments.md).
  */
 export async function findMatches(
   userId: number,
@@ -85,50 +94,53 @@ export async function findMatches(
 ): Promise<MatchResult[]> {
   const [rows] = await db.query<MatchRecord[]>(
     `WITH shared AS (
-       SELECT gm.group_id,
+       SELECT STRAIGHT_JOIN gm.group_id,
               SUM(LEAST(mine.end_minute, theirs.end_minute)
                   - GREATEST(mine.start_minute, theirs.start_minute)) AS shared_minutes
-         FROM group_member gm
-         JOIN v_user_availability_minutes theirs ON theirs.user_id = gm.user_id
-         JOIN v_user_availability_minutes mine
-           ON mine.user_id = :userId
-          AND mine.day_of_week = theirs.day_of_week
-          AND mine.start_minute < theirs.end_minute
+         FROM v_user_availability_minutes mine
+         JOIN v_user_availability_minutes theirs
+           ON theirs.day_of_week = mine.day_of_week
           AND theirs.start_minute < mine.end_minute
-        WHERE gm.state = 'active'
+          AND mine.start_minute < theirs.end_minute
+         JOIN group_member gm ON gm.user_id = theirs.user_id AND gm.state = 'active'
+        WHERE mine.user_id = :userId
         GROUP BY gm.group_id
      ),
      candidate AS (
-       SELECT g.*,
+       SELECT g.group_id, g.last_activity_at,
               COALESCE(g.game_id IN (SELECT ug.game_id FROM user_game ug WHERE ug.user_id = :userId), 0)
                 AS same_game,
               COALESCE(g.region_id = (SELECT p.region_id FROM profile p WHERE p.user_id = :userId), 0)
                 AS same_region,
               COALESCE(s.shared_minutes / 60 / NULLIF(g.member_count, 0), 0) AS overlap_hours
-         FROM v_group_card g
+         FROM lfg_group g
+         JOIN profile owner ON owner.user_id = g.owner_user_id
          LEFT JOIN shared s ON s.group_id = g.group_id
         WHERE g.visibility = 'open'
           AND g.status = 'recruiting'
-          AND g.open_slots > 0
+          AND g.member_count < g.max_members
           AND NOT EXISTS (
                 SELECT 1 FROM group_member me
                  WHERE me.group_id = g.group_id AND me.user_id = :userId AND me.state = 'active')
      ),
-     scored AS (
+     top_scored AS (
        SELECT candidate.*,
               :gameWeight * same_game
               + :regionWeight * same_region
               + LEAST(:availabilityWeight,
                       :availabilityWeight * overlap_hours / :fullHours) AS score
          FROM candidate
+        HAVING score > 0
+        ORDER BY score DESC, last_activity_at DESC, group_id
+        LIMIT :limit
      )
-     SELECT group_id, title, game_id, game_title, game_cover_url, region_code,
-            owner_display_name, member_count, max_members, open_slots, platform_slugs,
-            ROUND(score) AS score, same_game, same_region, ROUND(overlap_hours, 1) AS overlap_hours
-       FROM scored
-      WHERE score > 0
-      ORDER BY score DESC, last_activity_at DESC, group_id
-      LIMIT :limit`,
+     SELECT /*+ MERGE(c) */ c.group_id, c.title, c.game_id, c.game_title, c.game_cover_url, c.region_code,
+            c.owner_display_name, c.member_count, c.max_members, c.open_slots, c.platform_slugs,
+            ROUND(t.score) AS score, t.same_game, t.same_region,
+            ROUND(t.overlap_hours, 1) AS overlap_hours
+       FROM top_scored t
+       JOIN v_group_card c ON c.group_id = t.group_id
+      ORDER BY t.score DESC, t.last_activity_at DESC, t.group_id`,
     {
       userId,
       limit,

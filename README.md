@@ -181,6 +181,8 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 | [`docs/er-diagram.md`](docs/er-diagram.md)       | The ER diagram, in two readable pictures                               |
 | [`docs/normalization.md`](docs/normalization.md) | How the data reaches 3NF, in plain English                             |
 | [`docs/matchmaking.md`](docs/matchmaking.md)     | How the match score works, with an example                             |
+| [`docs/experiments.md`](docs/experiments.md)     | Phase 2 baselines, scaling, concurrency and weak spots, with charts    |
+| [`docs/literature.md`](docs/literature.md)       | How other systems match players, and how FAZE differs                  |
 | [`docs/performance.md`](docs/performance.md)     | `EXPLAIN` before/after for the three queries that matter               |
 | [`docs/phase1-report.md`](docs/phase1-report.md) | The Phase 1 report                                                     |
 | [`docs/phase1/`](docs/phase1/)                   | Phase 1 hand-in: the product document PDF and the website text         |
