@@ -67,6 +67,7 @@ export function GroupDetail() {
   }
 
   function startEditing() {
+    if (!group) return;
     setEditTitle(group.title);
     setEditDescription(group.description ?? '');
     setEditMaxMembers(String(group.maxMembers));

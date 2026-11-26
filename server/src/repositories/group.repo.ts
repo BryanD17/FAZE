@@ -236,15 +236,18 @@ export async function updateGroup(
   db: Db = pool,
 ): Promise<boolean> {
   const assignments: string[] = [];
-  const values: Record<string, unknown> = { groupId };
+  const values = {
+    groupId,
+    title: input.title ?? null,
+    description: input.description ?? null,
+    maxMembers: input.maxMembers ?? null,
+  };
 
   if (input.title !== undefined) {
     assignments.push('title = :title');
-    values.title = input.title;
   }
   if (input.description !== undefined) {
     assignments.push('description = :description');
-    values.description = input.description;
   }
   if (input.maxMembers !== undefined) {
     assignments.push('max_members = :maxMembers');
@@ -255,7 +258,6 @@ export async function updateGroup(
          ELSE status
        END`,
     );
-    values.maxMembers = input.maxMembers;
   }
   if (input.close) assignments.push("status = 'archived'");
 
