@@ -1,0 +1,40 @@
+
+> faze@0.1.0 typecheck
+> npm run typecheck --workspaces --if-present
+
+
+> @faze/shared@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @faze/server@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+src/repositories/group.repo.ts(262,29): error TS2769: No overload matches this call.
+  Overload 1 of 2, '(sql: string, values?: QueryValues): Promise<[ResultSetHeader, FieldPacket[]]>', gave the following error.
+    Argument of type 'Record<string, unknown>' is not assignable to parameter of type 'QueryValues'.
+      Type 'Record<string, unknown>' is missing the following properties from type 'Buffer<ArrayBufferLike>': slice, subarray, write, toJSON, and 97 more.
+  Overload 2 of 2, '(options: QueryOptions, values?: QueryValues): Promise<[ResultSetHeader, FieldPacket[]]>', gave the following error.
+    Argument of type 'string' is not assignable to parameter of type 'QueryOptions'.
+npm error Lifecycle script `typecheck` failed with error:
+npm error code 2
+npm error path /home/runner/work/FAZE/FAZE/server
+npm error workspace @faze/server@0.1.0
+npm error location /home/runner/work/FAZE/FAZE/server
+npm error command failed
+npm error command sh -c tsc -p tsconfig.json --noEmit
+
+
+> @faze/client@0.1.0 typecheck
+> tsc -p tsconfig.app.json --noEmit
+
+src/pages/GroupDetail.tsx(70,18): error TS18047: 'group' is possibly 'null'.
+src/pages/GroupDetail.tsx(71,24): error TS18047: 'group' is possibly 'null'.
+src/pages/GroupDetail.tsx(72,30): error TS18047: 'group' is possibly 'null'.
+npm error Lifecycle script `typecheck` failed with error:
+npm error code 2
+npm error path /home/runner/work/FAZE/FAZE/client
+npm error workspace @faze/client@0.1.0
+npm error location /home/runner/work/FAZE/FAZE/client
+npm error command failed
+npm error command sh -c tsc -p tsconfig.app.json --noEmit
