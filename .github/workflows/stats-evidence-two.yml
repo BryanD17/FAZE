@@ -1,4 +1,4 @@
-name: Capture stats screenshot evidence
+name: Capture stats screenshot retry two
 
 on:
   push:
@@ -39,28 +39,18 @@ jobs:
       - run: npm run db:migrate
       - name: Make stats public only in this disposable runner
         run: |
+          sed -i '/requireAuth,/d' server/src/routes/reports.ts
           python3 - <<'PY'
+          import re
           from pathlib import Path
 
-          reports = Path('server/src/routes/reports.ts')
-          text = reports.read_text()
-          text = text.replace("  requireAuth,\n", "")
-          reports.write_text(text)
-
-          app = Path('client/src/App.tsx')
-          text = app.read_text()
-          old = """          <Route
-            path="/stats"
-            element={
-              <RequireAuth>
-                <Stats />
-              </RequireAuth>
-            }
-          />"""
-          new = """          <Route path="/stats" element={<Stats />} />"""
-          if old not in text:
-              raise SystemExit('stats route shape changed')
-          app.write_text(text.replace(old, new))
+          path = Path('client/src/App.tsx')
+          text = path.read_text()
+          pattern = r'<Route\s+path="/stats"\s+element=\{\s*<RequireAuth>\s*<Stats\s*/>\s*</RequireAuth>\s*\}\s*/>'
+          text, count = re.subn(pattern, '<Route path="/stats" element={<Stats />} />', text)
+          if count != 1:
+              raise SystemExit(f'expected one stats route, changed {count}')
+          path.write_text(text)
           PY
       - name: Start API and website
         run: |
@@ -72,10 +62,13 @@ jobs:
             fi
             sleep 1
           done
+          cat /tmp/faze-server.txt
+          cat /tmp/faze-client.txt
           exit 1
       - name: Capture page
         run: |
           BROWSER="$(command -v google-chrome || command -v chromium || command -v chromium-browser)"
+          test -n "$BROWSER"
           "$BROWSER" --headless --no-sandbox --disable-gpu --hide-scrollbars             --window-size=1440,900 --virtual-time-budget=4000             --screenshot=docs/screenshots/stats.png             http://127.0.0.1:5173/stats
           test -s docs/screenshots/stats.png
       - name: Commit screenshot
