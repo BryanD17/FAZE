@@ -1,0 +1,85 @@
+name: Capture stats screenshot
+
+on:
+  push:
+    branches: [alvin-phase2-all]
+
+permissions:
+  contents: write
+
+jobs:
+  screenshot:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: faze
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: alvin-phase2-all
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Configure local app
+        run: |
+          printf '%s\n'             'NODE_ENV=development'             'PORT=4000'             'CLIENT_ORIGIN=http://127.0.0.1:5173'             'DB_HOST=127.0.0.1'             'DB_PORT=3306'             'DB_USER=root'             'DB_PASSWORD=root'             'DB_NAME=faze'             'JWT_ACCESS_SECRET=phase2-screenshot-secret-0123456789-abcdefghijklmnopqrstuvwxyz'             'ALLOW_UNVERIFIED_LOGIN=true'             'COOKIE_SECURE=false'             'LOG_LEVEL=silent' > .env
+      - run: npm run db:migrate
+      - name: Start API and website
+        run: |
+          npm run dev --workspace=@faze/server > /tmp/faze-server.txt 2>&1 &
+          npm run dev --workspace=@faze/client -- --host 127.0.0.1 > /tmp/faze-client.txt 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4000/api/health >/dev/null && curl -fsS http://127.0.0.1:5173 >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/faze-server.txt
+          cat /tmp/faze-client.txt
+          exit 1
+      - name: Create screenshot account
+        run: |
+          curl -fsS -X POST http://127.0.0.1:4000/api/auth/register             -H 'content-type: application/json'             -d '{"email":"stats-shot@demo.faze","password":"StatsPass123","displayName":"StatsShot"}'
+      - name: Install browser helper
+        run: |
+          npm install --no-save --package-lock=false playwright@1.49.1
+          npx playwright install chromium
+      - name: Capture /stats
+        run: |
+          cat > /tmp/stats-shot.mjs <<'JS'
+          import { chromium } from 'playwright';
+
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+          await page.goto('http://127.0.0.1:5173/login');
+          await page.fill('#email', 'stats-shot@demo.faze');
+          await page.fill('#password', 'StatsPass123');
+          await page.click('button[type="submit"]');
+          await page.waitForURL('**/profile');
+          await page.goto('http://127.0.0.1:5173/stats');
+          await page.getByRole('heading', { name: 'Database stats' }).waitFor();
+          await page.waitForFunction(() => !document.body.innerText.includes('Loading…'));
+          await page.screenshot({ path: 'docs/screenshots/stats.png', fullPage: true });
+          await browser.close();
+          JS
+          node /tmp/stats-shot.mjs
+      - name: Commit screenshot
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/screenshots/stats.png
+          git commit -m "docs: add database stats screenshot"
+          git push origin HEAD:alvin-phase2-all
