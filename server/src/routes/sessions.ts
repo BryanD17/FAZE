@@ -107,6 +107,13 @@ sessionsRouter.post(
 
     const role = await findActiveRole(session.groupId, req.user!.userId);
     if (role !== 'owner') forbiddenGroupRole();
+    if (session.state !== 'scheduled') {
+      throw new AppError(
+        ErrorCode.SESSION_NOT_SCHEDULED,
+        409,
+        `This session is already ${session.state}.`,
+      );
+    }
 
     await markSessionPlayed(sessionId);
     res.status(200).json(await findSession(sessionId));

@@ -264,7 +264,8 @@ export async function updateGroup(
   const [result] = await db.query<ResultSetHeader>(
     `UPDATE lfg_group
         SET ${assignments.join(', ')}
-      WHERE group_id = :groupId AND status <> 'archived'`,
+      WHERE group_id = :groupId AND status <> 'archived'
+        AND (:maxMembers IS NULL OR member_count <= :maxMembers)`,
     values,
   );
   return result.affectedRows === 1;

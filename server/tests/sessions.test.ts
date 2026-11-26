@@ -144,6 +144,17 @@ describe('play sessions and ratings API', () => {
       .expect(201, { ok: true });
   });
 
+  it('refuses to mark a session played twice', async () => {
+    const sessionId = await schedule('owner', '2030-01-15T20:00:00.000Z');
+    await request(app).post(`/api/sessions/${sessionId}/played`).set(auth('owner')).expect(200);
+
+    const response = await request(app)
+      .post(`/api/sessions/${sessionId}/played`)
+      .set(auth('owner'))
+      .expect(409);
+    expect(response.body.error.code).toBe('SESSION_NOT_SCHEDULED');
+  });
+
   it('refuses self-rating', async () => {
     const sessionId = await schedule('owner', '2030-01-14T20:00:00.000Z');
     await request(app).post(`/api/sessions/${sessionId}/played`).set(auth('owner')).expect(200);
