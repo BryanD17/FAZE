@@ -1,0 +1,47 @@
+name: Measure concurrency
+
+on:
+  push:
+    branches: [alvin-phase2-all]
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: faze
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Configure
+        run: |
+          printf '%s\n'             'NODE_ENV=development'             'PORT=4000'             'CLIENT_ORIGIN=http://localhost:5173'             'DB_HOST=127.0.0.1'             'DB_PORT=3306'             'DB_USER=root'             'DB_PASSWORD=root'             'DB_NAME=faze'             'JWT_ACCESS_SECRET=phase2-concurrency-secret-0123456789-abcdefghijklmnopqrstuvwxyz'             'ALLOW_UNVERIFIED_LOGIN=true'             'COOKIE_SECURE=false' > .env
+      - run: npm run db:migrate
+      - name: Start API
+        run: |
+          npm run dev --workspace=@faze/server > /tmp/faze-server.txt 2>&1 &
+          for i in {1..30}; do
+            curl -fsS http://127.0.0.1:4000/api/health >/dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/faze-server.txt
+          exit 1
+      - name: Measure joins
+        run: |
+          node db/perf/join-load.js | tee concurrency.txt
+          cat concurrency.txt >> "$GITHUB_STEP_SUMMARY"
+          if grep -q '| YES |' concurrency.txt; then exit 1; fi
