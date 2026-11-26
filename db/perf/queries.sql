@@ -30,7 +30,8 @@ SELECT g.group_id, g.title, g.member_count
  ORDER BY g.last_activity_at DESC LIMIT 20;
 
 -- =============================================================================
--- 2. The match query (same SQL as server/src/repositories/match.repo.ts, with
+-- 2. The match query as it was in Phase 1 (the current, faster form is in
+--    server/src/repositories/match.repo.ts; see docs/experiments.md), with
 --    user variables in place of the named parameters).
 --    Index: idx_availability_slot_day_time (migration 0012)
 -- =============================================================================

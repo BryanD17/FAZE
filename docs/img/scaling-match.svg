@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 360" font-family="sans-serif" font-size="13">
+<rect width="660" height="360" fill="#ffffff"/>
+<text x="70" y="24" font-size="15" font-weight="bold">Match query</text>
+<line x1="70" y1="310" x2="620" y2="310" stroke="#888"/>
+<line x1="70" y1="40" x2="70" y2="310" stroke="#888"/>
+<text x="14" y="175" transform="rotate(-90 14 175)" text-anchor="middle">ms (median of 5)</text>
+<text x="355" y="350" text-anchor="middle">users</text>
+<text x="62" y="314" text-anchor="end">0.0</text>
+<text x="62" y="179" text-anchor="end">150</text>
+<text x="62" y="44" text-anchor="end">301</text>
+<text x="70" y="328" text-anchor="middle">1,000</text>
+<text x="250" y="328" text-anchor="middle">10,000</text>
+<text x="430" y="328" text-anchor="middle">50,000</text>
+<text x="610" y="328" text-anchor="middle">100,000</text>
+<polyline points="70,306.4679337802167 250,286.25346177466366 430,189.2333080541065 610,64.54545454545456" fill="none" stroke="#5B3FE0" stroke-width="2.5"/>
+<circle cx="70" cy="306.4679337802167" r="4" fill="#5B3FE0"/>
+<circle cx="250" cy="286.25346177466366" r="4" fill="#5B3FE0"/>
+<circle cx="430" cy="189.2333080541065" r="4" fill="#5B3FE0"/>
+<circle cx="610" cy="64.54545454545456" r="4" fill="#5B3FE0"/>
+<text x="82" y="58" fill="#5B3FE0" font-weight="bold">no availability index</text>
+<polyline points="70,306.76899371015656 250,291.05992726437864 430,213.37511674082123 610,122.01093848974168" fill="none" stroke="#E8742C" stroke-width="2.5"/>
+<circle cx="70" cy="306.76899371015656" r="4" fill="#E8742C"/>
+<circle cx="250" cy="291.05992726437864" r="4" fill="#E8742C"/>
+<circle cx="430" cy="213.37511674082123" r="4" fill="#E8742C"/>
+<circle cx="610" cy="122.01093848974168" r="4" fill="#E8742C"/>
+<text x="82" y="76" fill="#E8742C" font-weight="bold">with index</text>
+</svg>
