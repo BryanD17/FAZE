@@ -1,0 +1,136 @@
+name: Run concurrency experiment once
+
+on:
+  push:
+    branches: [alvin-phase2-all]
+
+permissions:
+  contents: write
+
+jobs:
+  experiment:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: faze
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -proot"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: alvin-phase2-all
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Configure local experiment
+        run: |
+          cat > .env <<'EOF'
+          NODE_ENV=development
+          PORT=4000
+          CLIENT_ORIGIN=http://localhost:5173
+          DB_HOST=127.0.0.1
+          DB_PORT=3306
+          DB_USER=root
+          DB_PASSWORD=root
+          DB_NAME=faze
+          DB_NAME_TEST=faze_test
+          JWT_ACCESS_SECRET=phase2-concurrency-secret-0123456789-abcdefghijklmnopqrstuvwxyz
+          ALLOW_UNVERIFIED_LOGIN=true
+          DEMO_MODE=false
+          COOKIE_SECURE=false
+          LOG_LEVEL=silent
+          EOF
+      - run: npm run db:migrate
+      - run: npm run build --workspace=@faze/shared && npm run build --workspace=@faze/server
+      - name: Start API
+        run: |
+          npm start --workspace=@faze/server > /tmp/faze-server.txt 2>&1 &
+          echo $! > /tmp/faze-server.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4000/api/health >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/faze-server.txt
+          exit 1
+      - name: Run 50, 100 and 200 joins three times
+        run: |
+          node db/perf/join-load.js | tee concurrency.txt
+          if grep -q '| YES |' concurrency.txt; then
+            echo "A run exceeded group capacity."
+            exit 1
+          fi
+      - name: Write experiment section
+        run: |
+          {
+            echo '# Experiments'
+            echo
+            echo '## Concurrency'
+            echo
+            echo 'Re-run this experiment with the local API running:'
+            echo
+            echo '~~~bash'
+            echo 'node db/perf/join-load.js'
+            echo '~~~'
+            echo
+            echo 'FAZE groups are intentionally capped at 10 members, so each run used one owner and nine free seats. The script then sent 50, 100 and 200 simultaneous join requests from distinct temporary users through the real HTTP API. Each size was run three times.'
+            echo
+            awk '/^\| Requests \| Run \|/{printing=1} printing{print}' concurrency.txt
+            echo
+            echo 'In every run the group stayed at or below its 10-member limit. Only the nine available seats could be taken; the remaining requests were rejected as full. The stored member count also matched the real active membership rows after every run. This stays correct because sp_join_group locks the group row with SELECT ... FOR UPDATE, so concurrent join attempts serialize around the capacity check instead of all claiming the same final seat.'
+            echo
+            echo '![Concurrent join response time](img/concurrency-response-time.png)'
+          } > docs/experiments.md
+      - name: Make response-time chart
+        run: |
+          python3 -m pip install --quiet matplotlib
+          python3 - <<'PY'
+          import re
+          from collections import defaultdict
+          import matplotlib.pyplot as plt
+
+          rows = []
+          with open('concurrency.txt', encoding='utf-8') as f:
+              for line in f:
+                  m = re.match(r'\|\s*(50|100|200)\s*\|\s*(\d+)\s*\|\s*\d+\s*\|\s*\d+\s*\|\s*no\s*\|\s*([0-9.]+)\s*\|\s*([0-9.]+)\s*\|', line)
+                  if m:
+                      rows.append(tuple(map(float, m.groups())))
+
+          grouped = defaultdict(list)
+          for requests, run, median_ms, slowest_ms in rows:
+              grouped[int(requests)].append((median_ms, slowest_ms))
+
+          xs = sorted(grouped)
+          medians = [sum(v[0] for v in grouped[x]) / len(grouped[x]) for x in xs]
+          slowest = [sum(v[1] for v in grouped[x]) / len(grouped[x]) for x in xs]
+
+          plt.figure(figsize=(7, 4))
+          plt.plot(xs, medians, marker='o', label='Median response')
+          plt.plot(xs, slowest, marker='o', label='Slowest response')
+          plt.xlabel('Simultaneous join requests')
+          plt.ylabel('Response time (ms)')
+          plt.title('FAZE join concurrency')
+          plt.xticks(xs)
+          plt.legend()
+          plt.tight_layout()
+          plt.savefig('docs/img/concurrency-response-time.png', dpi=150)
+          PY
+      - name: Commit measured results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/experiments.md docs/img/concurrency-response-time.png
+          git commit -m "docs: add concurrency experiment results"
+          git push origin HEAD:alvin-phase2-all
