@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import type { CreateGroup, GroupListQuery } from '@faze/shared';
+import type { CreateGroup, GroupListQuery, UpdateGroup } from '@faze/shared';
 
 import { groupService, parseGroupId } from '../services/group.service.js';
 
@@ -14,6 +14,18 @@ export const groupController = {
 
   async detail(req: Request, res: Response) {
     res.status(200).json(await groupService.detail(parseGroupId(req.params.id), req.user!.userId));
+  },
+
+  async update(req: Request, res: Response) {
+    res
+      .status(200)
+      .json(
+        await groupService.update(
+          parseGroupId(req.params.id),
+          req.user!.userId,
+          req.body as UpdateGroup,
+        ),
+      );
   },
 
   async join(req: Request, res: Response) {

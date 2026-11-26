@@ -7,4 +7,5 @@ export * from './schemas/auth.js';
 export * from './schemas/profile.js';
 export * from './schemas/group.js';
 export * from './schemas/message.js';
+export * from './schemas/session.js';
 export * from './availability.js';

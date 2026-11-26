@@ -1,10 +1,10 @@
 /**
- * Group SQL. Reads come from v_group_card; every write is one of the three
- * stored procedures (0008), which own capacity checks and owner succession.
- * member_count and status are maintained by triggers (0009) and only read here.
+ * Group SQL. Reads come from v_group_card; writes that touch membership still
+ * go through the stored procedures. Group metadata edits are a single-table
+ * UPDATE, while member_count remains trigger-owned.
  */
-import type { RowDataPacket } from 'mysql2/promise';
-import type { CreateGroup } from '@faze/shared';
+import type { ResultSetHeader, RowDataPacket } from 'mysql2/promise';
+import type { CreateGroup, UpdateGroup } from '@faze/shared';
 
 import { pool } from '../db/pool.js';
 import type { GroupRole } from './membership.repo.js';
@@ -27,6 +27,7 @@ export interface GroupCard {
 }
 
 export interface GroupMember {
+  userId: number;
   displayName: string;
   role: GroupRole;
   joinedAt: Date;
@@ -43,6 +44,11 @@ export interface GroupFilters {
   gameId?: number;
   platformId?: number;
   regionId?: number;
+}
+
+export interface GroupEditState {
+  memberCount: number;
+  status: string;
 }
 
 interface CardRecord extends RowDataPacket {
@@ -65,6 +71,11 @@ interface DetailRecord extends CardRecord {
   description: string | null;
   language_code: string | null;
   region_name: string | null;
+}
+
+interface EditRecord extends RowDataPacket {
+  member_count: number;
+  status: string;
 }
 
 const CARD_COLUMNS = `g.group_id, g.title, g.game_id, g.game_title, g.game_cover_url, g.region_code,
@@ -171,9 +182,9 @@ export async function getGroup(groupId: number, db: Db = pool): Promise<GroupDet
   const [rows] = await db.query<DetailRecord[]>(
     `SELECT ${CARD_COLUMNS}, lg.description, l.iso_code AS language_code, r.name AS region_name
        FROM v_group_card g
-       JOIN lfg_group lg       ON lg.group_id = g.group_id
+       JOIN lfg_group lg        ON lg.group_id = g.group_id
        LEFT JOIN \`language\` l ON l.language_id = lg.language_id
-       LEFT JOIN region r      ON r.region_id = g.region_id
+       LEFT JOIN region r       ON r.region_id = g.region_id
       WHERE g.group_id = :groupId AND g.status <> 'archived'`,
     { groupId },
   );
@@ -181,7 +192,7 @@ export async function getGroup(groupId: number, db: Db = pool): Promise<GroupDet
   if (!row) return null;
 
   const [members] = await db.query<RowDataPacket[]>(
-    `SELECT p.display_name, gm.role, gm.joined_at
+    `SELECT gm.user_id, p.display_name, gm.role, gm.joined_at
        FROM group_member gm
        JOIN profile p ON p.user_id = gm.user_id
       WHERE gm.group_id = :groupId AND gm.state = 'active'
@@ -195,11 +206,68 @@ export async function getGroup(groupId: number, db: Db = pool): Promise<GroupDet
     languageCode: row.language_code,
     regionName: row.region_name,
     members: members.map((m) => ({
+      userId: Number(m.user_id),
       displayName: m.display_name as string,
       role: m.role as GroupRole,
       joinedAt: m.joined_at as Date,
     })),
   };
+}
+
+/** The small bit of state needed to validate an owner edit. */
+export async function getGroupEditState(
+  groupId: number,
+  db: Db = pool,
+): Promise<GroupEditState | null> {
+  const [rows] = await db.query<EditRecord[]>(
+    `SELECT member_count, status
+       FROM lfg_group
+      WHERE group_id = :groupId`,
+    { groupId },
+  );
+  const row = rows[0];
+  return row ? { memberCount: row.member_count, status: row.status } : null;
+}
+
+/** Edit owner-controlled metadata or archive the group. member_count is never written here. */
+export async function updateGroup(
+  groupId: number,
+  input: UpdateGroup,
+  db: Db = pool,
+): Promise<boolean> {
+  const assignments: string[] = [];
+  const values = {
+    groupId,
+    title: input.title ?? null,
+    description: input.description ?? null,
+    maxMembers: input.maxMembers ?? null,
+  };
+
+  if (input.title !== undefined) {
+    assignments.push('title = :title');
+  }
+  if (input.description !== undefined) {
+    assignments.push('description = :description');
+  }
+  if (input.maxMembers !== undefined) {
+    assignments.push('max_members = :maxMembers');
+    assignments.push(
+      `status = CASE
+         WHEN status IN ('recruiting', 'full') AND member_count >= :maxMembers THEN 'full'
+         WHEN status IN ('recruiting', 'full') THEN 'recruiting'
+         ELSE status
+       END`,
+    );
+  }
+  if (input.close) assignments.push("status = 'archived'");
+
+  const [result] = await db.query<ResultSetHeader>(
+    `UPDATE lfg_group
+        SET ${assignments.join(', ')}
+      WHERE group_id = :groupId AND status <> 'archived'`,
+    values,
+  );
+  return result.affectedRows === 1;
 }
 
 /** True when the group exists and is not archived. */

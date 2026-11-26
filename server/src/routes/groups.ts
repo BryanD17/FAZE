@@ -1,9 +1,10 @@
 import { Router } from 'express';
-import { createGroupSchema, groupListQuerySchema } from '@faze/shared';
+import { createGroupSchema, groupListQuerySchema, updateGroupSchema } from '@faze/shared';
 
 import { groupController } from '../controllers/group.controller.js';
 import { asyncHandler } from '../middleware/asyncHandler.js';
 import { requireAuth } from '../middleware/requireAuth.js';
+import { requireGroupRole } from '../middleware/requireGroupRole.js';
 import { validateBody, validateQuery } from '../middleware/validate.js';
 
 export const groupsRouter = Router();
@@ -23,6 +24,14 @@ groupsRouter.post(
 );
 
 groupsRouter.get('/:id', requireAuth, asyncHandler(groupController.detail));
+
+groupsRouter.patch(
+  '/:id',
+  requireAuth,
+  requireGroupRole('owner'),
+  validateBody(updateGroupSchema),
+  asyncHandler(groupController.update),
+);
 
 groupsRouter.post('/:id/join', requireAuth, asyncHandler(groupController.join));
 

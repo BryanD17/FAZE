@@ -197,7 +197,7 @@ not retype them. Unknown fields are rejected with `400 VALIDATION_ERROR`.
 ## Groups
 
 All group routes need `Authorization: Bearer <token>`. Request shapes are
-`createGroupSchema` and `groupListQuerySchema` in `shared/src/schemas/group.ts`.
+`createGroupSchema`, `updateGroupSchema` and `groupListQuerySchema` in `shared/src/schemas/group.ts`.
 Groups are always created open to join; there is no approval step. Archived
 groups (everyone left) behave as if they do not exist.
 
@@ -206,6 +206,7 @@ groups (everyone left) behave as if they do not exist.
 | GET    | `/api/groups`           | query: `gameId`, `platformId`, `regionId` (all optional), `page` (default 1)                                | 20 groups per page, newest first         |
 | POST   | `/api/groups`           | `{ gameId, title 3–120, description? ≤1000, regionId, languageId, maxMembers 2–10, platformIds: 1–10 ids }` | Create a group; you become its owner     |
 | GET    | `/api/groups/:id`       | —                                                                                                           | One group with its members               |
+| PATCH  | `/api/groups/:id`       | owner only: any of `title`, `description`, `maxMembers`, or `{ close: true }`                               | Edit or archive a group                  |
 | POST   | `/api/groups/:id/join`  | —                                                                                                           | Join (`sp_join_group`, safe under races) |
 | POST   | `/api/groups/:id/leave` | —                                                                                                           | Leave (`sp_leave_group`)                 |
 
@@ -215,20 +216,33 @@ memberCount, maxMembers, openSlots, platforms: string[], status, createdAt }`
 (the same fields `GET /api/matches` uses, without the score).
 
 **Detail** `200` (and **create** `201`) → a card plus `{ description, languageCode,
-regionName, myRole: 'owner' | 'moderator' | 'member' | null, members: [{ displayName,
-role, joinedAt }] }`. `myRole` is `null` when you are not a member.
+regionName, myRole: 'owner' | 'moderator' | 'member' | null, members: [{ userId, displayName, role, joinedAt }] }`. `myRole` is `null` when you are not a member.
 
 **Join** `200` → `{ "result": "JOINED" }`. **Leave** `200` →
 `{ "result": "LEFT_MEMBER_REMAINS" | "LEFT_SUCCESSOR_PROMOTED" | "LEFT_GROUP_ARCHIVED" }`.
 
-| Status | `code`              | When                                                                              |
-| ------ | ------------------- | --------------------------------------------------------------------------------- |
-| 400    | `VALIDATION_ERROR`  | Bad body or query, or `:id` is not a positive integer (`field: "id"`)             |
-| 404    | `GROUP_NOT_FOUND`   | No such group, the group is archived, or you leave a group you are not in         |
-| 409    | `GROUP_FULL`        | Join: no free seat                                                                |
-| 409    | `ALREADY_MEMBER`    | Join: you are already in the group                                                |
-| 409    | the procedure code  | Join: any other refusal from `sp_join_group`                                      |
-| 422    | `INVALID_REFERENCE` | Create: an id does not exist, or the game is not multiplayer (`field` says which) |
+| Status | `code`                           | When                                                                              |
+| ------ | -------------------------------- | --------------------------------------------------------------------------------- |
+| 400    | `VALIDATION_ERROR`               | Bad body or query, or `:id` is not a positive integer (`field: "id"`)             |
+| 404    | `GROUP_NOT_FOUND`                | No such group, the group is archived, or you leave a group you are not in         |
+| 409    | `GROUP_FULL`                     | Join: no free seat                                                                |
+| 409    | `ALREADY_MEMBER`                 | Join: you are already in the group                                                |
+| 409    | `GROUP_LIMIT_BELOW_MEMBER_COUNT` | Edit: `maxMembers` is below the current active member count                       |
+| 409    | the procedure code               | Join: any other refusal from `sp_join_group`                                      |
+| 422    | `INVALID_REFERENCE`              | Create: an id does not exist, or the game is not multiplayer (`field` says which) |
+
+## Sessions and ratings
+
+All session routes require `Authorization: Bearer <token>`.
+
+| Method | Path                        | Auth         | Body / purpose                                                                  |
+| ------ | --------------------------- | ------------ | ------------------------------------------------------------------------------- |
+| GET    | `/api/groups/:id/sessions`  | group member | List the group's sessions, newest first                                         |
+| POST   | `/api/groups/:id/sessions`  | group member | `{ "startsAt": "2030-01-10T20:00:00.000Z" }` schedules a session                |
+| POST   | `/api/sessions/:id/played`  | group owner  | Mark the session played through `sp_record_session_played`                      |
+| POST   | `/api/sessions/:id/ratings` | signed in    | `{ "rateeUserId": 123, "score": 1-5 }`; the rating trigger enforces eligibility |
+
+A rating before a session is played, a rating involving a non-member, or a self-rating is refused with `409 RATING_REJECTED`. A duplicate rating for the same teammate and session returns `409 ALREADY_RATED`.
 
 ## Messages
 
