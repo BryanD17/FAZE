@@ -60,11 +60,7 @@ function throwRatingError(err: unknown): never {
   const sqlMessage = databaseErrorField(err, 'sqlMessage');
 
   if (sqlState === '45000') {
-    throw new AppError(
-      ErrorCode.RATING_REJECTED,
-      409,
-      sqlMessage ?? 'That rating is not allowed.',
-    );
+    throw new AppError(ErrorCode.RATING_REJECTED, 409, sqlMessage ?? 'That rating is not allowed.');
   }
   if (code === 'ER_DUP_ENTRY') {
     throw new AppError(

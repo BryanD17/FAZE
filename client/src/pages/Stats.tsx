@@ -77,9 +77,7 @@ export function Stats() {
                     <tr key={game.gameId} className="border-t border-subtle">
                       <td className="px-3 py-2">{game.title}</td>
                       <td className="px-3 py-2 text-right tabular-nums">{game.activeGroups}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">
-                        {game.searchingUsers}
-                      </td>
+                      <td className="px-3 py-2 text-right tabular-nums">{game.searchingUsers}</td>
                     </tr>
                   ))}
                 </tbody>

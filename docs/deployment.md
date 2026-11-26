@@ -135,7 +135,7 @@ Open:
 The health check should return:
 
 ```json
-{"ok":true,"db":"up"}
+{ "ok": true, "db": "up" }
 ```
 
 ## 8. Sign in to prove the demo is ready
@@ -152,15 +152,15 @@ chat. The full click-through is in [`demo.md`](demo.md).
 
 ## If it does not work
 
-| Problem | Fix |
-| --- | --- |
-| `ECONNREFUSED` to MySQL or `/api/health` says `"db":"down"` | Start MySQL first. With Docker, run `docker compose up -d`. |
-| Docker says port `3306` is already in use | A local MySQL server is already using that port. Use that MySQL instance, stop it before Docker, or change the Docker port and `DB_PORT` together. |
-| Server says `JWT_ACCESS_SECRET` is still the placeholder | Generate a new value with `openssl rand -base64 48` and put it in `.env`. |
-| `npm test` cannot find `faze_test` | Create the `faze_test` database using the command in step 3. |
-| `db:seed` says games are missing | Run `npm run etl:all` before `npm run db:seed`. |
-| Login requests from the Vite site show proxy `ECONNREFUSED` | The Express server on port `4000` did not start. Read the server terminal for the first error. |
-| Safari logs out after a local reload | Set `COOKIE_SECURE=false` in local `.env`. Do not use that setting for the hosted production demo. |
+| Problem                                                     | Fix                                                                                                                                                |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ECONNREFUSED` to MySQL or `/api/health` says `"db":"down"` | Start MySQL first. With Docker, run `docker compose up -d`.                                                                                        |
+| Docker says port `3306` is already in use                   | A local MySQL server is already using that port. Use that MySQL instance, stop it before Docker, or change the Docker port and `DB_PORT` together. |
+| Server says `JWT_ACCESS_SECRET` is still the placeholder    | Generate a new value with `openssl rand -base64 48` and put it in `.env`.                                                                          |
+| `npm test` cannot find `faze_test`                          | Create the `faze_test` database using the command in step 3.                                                                                       |
+| `db:seed` says games are missing                            | Run `npm run etl:all` before `npm run db:seed`.                                                                                                    |
+| Login requests from the Vite site show proxy `ECONNREFUSED` | The Express server on port `4000` did not start. Read the server terminal for the first error.                                                     |
+| Safari logs out after a local reload                        | Set `COOKIE_SECURE=false` in local `.env`. Do not use that setting for the hosted production demo.                                                 |
 
 ## Hosted demo
 

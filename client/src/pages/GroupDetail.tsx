@@ -2,11 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 
 import { ChatBox } from '../components/ChatBox.tsx';
-import {
-  inputClass,
-  primaryButtonClass,
-  secondaryButtonClass,
-} from '../components/Field.tsx';
+import { inputClass, primaryButtonClass, secondaryButtonClass } from '../components/Field.tsx';
 import { GameInitial, memberCountLabel } from '../components/GroupCard.tsx';
 import { SessionsBox } from '../components/SessionsBox.tsx';
 import { api, ApiError, messageOf } from '../lib/api.ts';

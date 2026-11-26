@@ -137,7 +137,9 @@ export function SessionsBox({
                       const key = `${session.sessionId}:${member.userId}`;
                       return (
                         <div key={member.userId} className="flex items-center gap-2">
-                          <span className="min-w-0 flex-1 truncate text-sm">{member.displayName}</span>
+                          <span className="min-w-0 flex-1 truncate text-sm">
+                            {member.displayName}
+                          </span>
                           {rated.has(key) ? (
                             <span className="text-sm text-content-muted">Rated</span>
                           ) : (

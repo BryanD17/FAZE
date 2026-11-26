@@ -34,7 +34,10 @@ function accessToken(userId, displayName) {
     JSON.stringify({ displayName, sub: String(userId), iat: now, exp: now + 15 * 60 }),
   ).toString('base64url');
   const unsigned = `${header}.${payload}`;
-  const signature = crypto.createHmac('sha256', JWT_ACCESS_SECRET).update(unsigned).digest('base64url');
+  const signature = crypto
+    .createHmac('sha256', JWT_ACCESS_SECRET)
+    .update(unsigned)
+    .digest('base64url');
   return `${unsigned}.${signature}`;
 }
 
