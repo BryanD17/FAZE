@@ -31,12 +31,19 @@ export type GroupCard = {
 
 export type GroupListReply = { groups: GroupCard[]; page: number; hasMore: boolean };
 
+export type GroupMember = {
+  userId: number;
+  displayName: string;
+  role: GroupRole;
+  joinedAt: string;
+};
+
 export type GroupDetail = GroupCard & {
   description: string | null;
   languageCode: string;
   regionName: string;
   myRole: GroupRole | null;
-  members: { displayName: string; role: GroupRole; joinedAt: string }[];
+  members: GroupMember[];
 };
 
 export type LeaveResult = 'LEFT_MEMBER_REMAINS' | 'LEFT_SUCCESSOR_PROMOTED' | 'LEFT_GROUP_ARCHIVED';
@@ -52,5 +59,13 @@ export type Message = {
   messageId: number;
   displayName: string;
   body: string;
+  createdAt: string;
+};
+
+export type PlaySession = {
+  sessionId: number;
+  groupId: number;
+  startsAt: string;
+  state: 'scheduled' | 'played' | 'cancelled';
   createdAt: string;
 };

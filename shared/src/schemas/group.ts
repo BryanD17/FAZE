@@ -19,6 +19,20 @@ export const createGroupSchema = z
 
 export type CreateGroup = z.infer<typeof createGroupSchema>;
 
+export const updateGroupSchema = z
+  .object({
+    title: z.string().trim().min(3).max(120).optional(),
+    description: z.string().trim().max(1000).nullable().optional(),
+    maxMembers: z.number().int().min(GROUP_MIN_MEMBERS).max(GROUP_MAX_MEMBERS).optional(),
+    close: z.literal(true).optional(),
+  })
+  .strict()
+  .refine((body) => Object.values(body).some((value) => value !== undefined), {
+    message: 'Change at least one group field.',
+  });
+
+export type UpdateGroup = z.infer<typeof updateGroupSchema>;
+
 export const groupListQuerySchema = z.object({
   gameId: z.coerce.number().int().positive().optional(),
   platformId: z.coerce.number().int().positive().optional(),

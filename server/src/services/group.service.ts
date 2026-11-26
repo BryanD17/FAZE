@@ -1,4 +1,4 @@
-import type { CreateGroup, GroupListQuery } from '@faze/shared';
+import type { CreateGroup, GroupListQuery, UpdateGroup } from '@faze/shared';
 import { GROUP_PAGE_SIZE } from '@faze/shared';
 
 import { AppError, ErrorCode } from '../errors.js';
@@ -6,10 +6,12 @@ import {
   checkReferences,
   createGroup,
   getGroup,
+  getGroupEditState,
   groupIsLive,
   joinGroup,
   leaveGroup,
   listGroups,
+  updateGroup,
 } from '../repositories/group.repo.js';
 import { findActiveRole } from '../repositories/membership.repo.js';
 
@@ -64,6 +66,24 @@ export const groupService = {
 
     const groupId = await createGroup(ownerId, input);
     return groupService.detail(groupId, ownerId);
+  },
+
+  async update(groupId: number, viewerId: number, input: UpdateGroup) {
+    const state = await getGroupEditState(groupId);
+    if (!state || state.status === 'archived') groupNotFound();
+
+    if (input.maxMembers !== undefined && input.maxMembers < state.memberCount) {
+      throw new AppError(
+        ErrorCode.GROUP_LIMIT_BELOW_MEMBER_COUNT,
+        409,
+        `The group already has ${state.memberCount} active members.`,
+        'maxMembers',
+      );
+    }
+
+    if (!(await updateGroup(groupId, input))) groupNotFound();
+    if (input.close) return { groupId, status: 'archived' as const };
+    return groupService.detail(groupId, viewerId);
   },
 
   async join(userId: number, groupId: number) {

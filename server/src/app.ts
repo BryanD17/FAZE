@@ -24,6 +24,7 @@ import { matchesRouter } from './routes/matches.js';
 import { messagesRouter } from './routes/messages.js';
 import { profileRouter } from './routes/profile.js';
 import { reportsRouter } from './routes/reports.js';
+import { sessionsRouter } from './routes/sessions.js';
 import { createAuthService } from './services/auth.service.js';
 import { createDefaultMailer } from './services/mailer.js';
 import type { Mailer } from './services/mailer.js';
@@ -71,6 +72,7 @@ export function createApp(opts: AppOptions = {}) {
   app.use('/api/profile', profileRouter);
   app.use('/api/games', gamesRouter);
   app.use('/api/groups', messagesRouter);
+  app.use('/api', sessionsRouter);
   app.use('/api/groups', groupsRouter);
 
   app.use(notFound);

@@ -9,11 +9,13 @@ import { Matches } from './pages/Matches.tsx';
 import { Placeholder } from './pages/Placeholder.tsx';
 import { Profile } from './pages/Profile.tsx';
 import { Register } from './pages/Register.tsx';
+import { Stats } from './pages/Stats.tsx';
 
 const appLinks = [
   { to: '/groups', label: 'Groups' },
   { to: '/matches', label: 'Matches' },
   { to: '/profile', label: 'Profile' },
+  { to: '/stats', label: 'Stats' },
 ];
 
 function navClass({ isActive }: { isActive: boolean }) {
@@ -102,6 +104,14 @@ export function App() {
             element={
               <RequireAuth>
                 <Matches />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/stats"
+            element={
+              <RequireAuth>
+                <Stats />
               </RequireAuth>
             }
           />
