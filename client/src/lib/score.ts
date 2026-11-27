@@ -10,7 +10,9 @@ export type ScoreParts = { game: number; region: number; freeTime: number };
  *
  * Game and region are all-or-nothing. Free time is whatever is left of the
  * (rounded) total, so the three parts always add up to the score shown on the
- * card, clamped to 0–30 in case of rounding at the edges.
+ * card, clamped to 0–30 in case of rounding at the edges. (Recomputing it from
+ * `overlapHours` could be off by one from the total, because the server
+ * rounds the total and the hours separately.)
  */
 export function scoreParts(
   match: Pick<MatchCard, 'score' | 'sameGame' | 'sameRegion'>,

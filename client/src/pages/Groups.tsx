@@ -122,7 +122,7 @@ export function Groups() {
         <Loading label="Loading groups…" />
       ) : list.data.groups.length === 0 ? (
         <Empty>
-          {params.toString()
+          {['gameId', 'platformId', 'regionId'].some((key) => params.has(key))
             ? 'No groups match these filters yet. Try “Any” on one of them, or create a group.'
             : 'No open groups yet. Be the first: press “Create group”.'}
         </Empty>
