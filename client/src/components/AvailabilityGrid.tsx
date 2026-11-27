@@ -93,8 +93,13 @@ export function AvailabilityGrid({
     toggle(col, hour);
   }
 
-  function onPointerEnter(col: number, hour: number) {
+  function onPointerEnter(event: PointerEvent<HTMLButtonElement>, col: number, hour: number) {
     if (paint.current === null) return;
+    // The button was released outside the window, so this is not a drag any more.
+    if (event.buttons === 0) {
+      paint.current = null;
+      return;
+    }
     apply(DISPLAY_DAYS[col] ?? 0, hour, paint.current);
   }
 
@@ -126,8 +131,8 @@ export function AvailabilityGrid({
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm text-content-muted">
-        Times are in <span className="text-content-primary">{timezone}</span>. Click or drag to mark
-        the hours you can play; arrow keys and Space work too.{' '}
+        Times are in <span className="text-content-primary">{timezone}</span>. Click (or drag with a
+        mouse) to mark the hours you can play; arrow keys and Space work too.{' '}
         <span className="tabular-nums">
           {total} {total === 1 ? 'hour' : 'hours'} a week selected.
         </span>
@@ -176,7 +181,7 @@ export function AvailabilityGrid({
                         aria-pressed={on}
                         aria-label={cellLabel(day, hour)}
                         onPointerDown={(e) => onPointerDown(e, col, hour)}
-                        onPointerEnter={() => onPointerEnter(col, hour)}
+                        onPointerEnter={(e) => onPointerEnter(e, col, hour)}
                         onClick={() => onClick(col, hour)}
                         onKeyDown={(e) => onKeyDown(e, col, hour)}
                         onFocus={() => setFocus({ col, hour })}

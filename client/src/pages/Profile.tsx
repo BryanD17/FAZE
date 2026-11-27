@@ -280,10 +280,11 @@ export function Profile() {
             timezone={form.timezone}
             onChange={(cells) => change({ cells, gridChanged: true })}
           />
-          {form.rounded && !form.gridChanged && (
+          {form.rounded && (
             <p className="text-sm text-content-muted">
-              Some saved times do not start on the hour, so the grid shows the whole hour. They stay
-              exactly as saved unless you change the grid.
+              {form.gridChanged
+                ? 'Some saved times did not start on the hour. Saving now stores the whole hours shown in the grid.'
+                : 'Some saved times do not start on the hour, so the grid shows the whole hour. They stay exactly as saved unless you change the grid.'}
             </p>
           )}
           {errors.availability && <p className="text-sm text-danger">{errors.availability}</p>}
