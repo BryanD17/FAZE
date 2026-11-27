@@ -8,6 +8,15 @@ against 12 rows. This document covers where the data comes from, exactly how
 it becomes the `game` table, every rejection rule, and the honest known
 quality issues rather than a sanitized summary.
 
+## In short
+
+| Question                       | Answer                                                                                                                                                                 |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Where does the data come from? | Games: a public Steam catalog export (§1.1). People, groups and chat: a demo seed script written for this project (§6).                                                |
+| How much went in and out?      | 140,082 Steam apps staged → **118,001 games** loaded, **22,081 rejected** (17,891 demos, 2,282 duplicates, 1,908 non-Latin titles), all recorded in `etl_reject` (§4). |
+| How do I re-run it?            | `npm run db:reset && npm run etl:all && npm run db:seed` (§5, §6). Both steps are safe to run twice.                                                                   |
+| What is missing?               | Cover art (RAWG blocked, §1.2), and five big non-Steam games such as Valorant and Minecraft (§3.5).                                                                    |
+
 ---
 
 ## 1. Sources
@@ -255,7 +264,7 @@ of ®).
 
 ### 3.6 Non-Latin-script titles cannot produce a URL slug
 
-**Finding:** 3,816 promoted-candidate rows (1.6% of the 122,191 non-demo Steam
+**Finding:** 1,908 promoted-candidate rows (1.6% of the 122,191 non-demo Steam
 apps) have titles entirely in a non-Latin script — Japanese, Chinese, Arabic,
 Russian — for which `slugify()` correctly strips every character, producing
 an empty string. Example rejects: `"ルナティックドーン 前途への道標"`,
@@ -372,6 +381,47 @@ games by ownership that still have a `NULL` cover_url — nothing else needs to
 change, and the stage's own cache means a partial prior run costs nothing to
 resume.
 
+**Check the counts after a run:**
+
+```sql
+SELECT source, status, rows_in, rows_loaded, rows_rejected, started_at
+  FROM etl_run ORDER BY run_id DESC LIMIT 5;
+SELECT reason, COUNT(*) FROM etl_reject GROUP BY reason ORDER BY 2 DESC;
+SELECT COUNT(*) FROM game;   -- 118001
+```
+
 `db/data/raw/` and `db/data/cache/` are gitignored — nobody should ever need
 to download these files from anywhere but the commands above, and nobody
 should ever commit them.
+
+---
+
+## 6. Demo data (people, groups, chat)
+
+The game catalog is real. The **people** are not: a matching app needs users,
+groups and messages to show, and real personal data has no place in a class
+project. `db/seeds/seed.js` writes a small, hand-written cast instead.
+
+| Table               | Rows | Notes                                                                                                                                                                     |
+| ------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user` + `profile`  | 40   | Spread over all seven regions, with real time zones. Every email ends in `@demo.faze`.                                                                                    |
+| `availability_slot` | —    | Each person plays in their own local evening, so people in one region overlap and the score means something.                                                              |
+| `lfg_group`         | 15   | Real games from the catalog, looked up by slug (game ids change between ETL runs, slugs do not).                                                                          |
+| `group_member`      | —    | Owners join through `sp_create_group` and members through `sp_join_group`, the same procedures the API uses. The script prints the `member_count` drift, which must be 0. |
+| `message`           | 200  | Short, game-specific chat lines.                                                                                                                                          |
+
+**Re-run it:** `npm run db:seed` (it needs the catalog first). The script is safe to run
+twice: it deletes exactly the `@demo.faze` accounts, and everything they own
+cascades with them, before inserting them again. Real accounts are never
+touched. Every demo account's password is `DemoPass123`; log in as
+`maya@demo.faze` for the walk-through in [`demo.md`](demo.md).
+
+**Rejected rows:** none. The seed is hand-written, so a bad row is a bug in the
+script, and the foreign keys and CHECKs would stop it with an error. It doesn't
+fail quietly.
+
+**Hosted database:** the script refuses to run with `NODE_ENV=production`,
+because it deletes rows. To load the demo data into the hosted database
+(Aiven), run it from your own machine with the Aiven values in `.env` and
+`NODE_ENV` left unset (or `development`). Do this only on a database that
+holds no real accounts with `@demo.faze` emails.
