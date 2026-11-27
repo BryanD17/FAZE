@@ -11,6 +11,13 @@
     @apply bg-surface text-content-primary font-sans antialiased;
   }
 
+  /* Headings use the deck's display face. */
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+  }
+
   /* Accessibility is a requirement, not a stretch goal: every interactive
      element keeps a visible focus ring for keyboard users. */
   :focus-visible {

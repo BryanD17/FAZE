@@ -9,7 +9,7 @@ export function Home() {
       <div className="z-10 max-w-2xl p-10">
         <p className="text-sm tracking-[4px] text-content-muted">FIND YOUR GROUP</p>
 
-        <h1 className="my-2.5 text-8xl font-bold">FAZE</h1>
+        <h1 className="my-2.5 text-7xl font-bold sm:text-8xl">FAZE</h1>
 
         <p className="mb-8 text-xl leading-normal text-content-muted">
           Find gamers who play the same games, at the same times, for the same reasons.
@@ -17,7 +17,7 @@ export function Home() {
 
         <Link
           to="/groups"
-          className="inline-block rounded-sm bg-accent px-6 py-3.5 font-medium text-surface hover:bg-accent-hover"
+          className="inline-block rounded-sm bg-accent px-6 py-3.5 font-medium text-content-primary hover:bg-accent-hover"
         >
           Browse Groups →
         </Link>
