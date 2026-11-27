@@ -25,7 +25,7 @@ people in.
   checked by the shared zod schema on the client and again on the server.
 - **Sessions:** a 15-minute JWT access token, kept in memory and never in
   `localStorage`. There is also a refresh cookie, set `httpOnly` and
-  `SameSite=Lax` (and `Secure` in production). The database stores only its
+  `SameSite=Lax` and `Secure` (unless `COOKIE_SECURE=false`, for local HTTP). The database stores only its
   SHA-256. The token rotates on every use, and reusing an old one revokes the
   whole family (`auth.test.ts`).
 - **Brute force:** after the 6th failed sign-in from one IP the server answers 429. Registration and password reset are limited too. On Render,
@@ -43,14 +43,14 @@ grep -rn '\${' server/src/repositories server/src/services server/src/routes \
 
 **Every hit, and why it is safe:**
 
-| File                                       | What is interpolated                         | Why it is safe                                                                                                                 |
-| ------------------------------------------ | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `group.repo.ts` `listGroups`               | `CARD_COLUMNS`, a list of `WHERE` conditions | Both are fixed strings in the code. Filter **values** are bound as `:gameId`, `:regionId`, `:platformId`, `:limit`, `:offset`. |
-| `group.repo.ts` `updateGroup`              | a list of `SET` assignments                  | Fixed strings chosen by which fields are present. Values are bound as `:title`, `:description`, `:maxMembers`.                 |
-| `group.repo.ts` `callMembershipProcedure`  | the procedure name                           | The TypeScript type allows only `'sp_join_group' \| 'sp_leave_group'`. The ids are bound.                                      |
-| `profile.repo.ts` `updateProfile`          | column names                                 | Looked up in a fixed `columns` map. Unknown keys are dropped before the query, and values are bound as `:key`.                 |
-| `profile.repo.ts` `updateGameLibraryEntry` | column names                                 | Same pattern: a fixed map, with bound values.                                                                                  |
-| `profile.repo.ts` `existingIdCount`        | table and column name, a `?,?,?` list        | The table and column are typed literals. The ids are bound as `?` placeholders.                                                |
+| File                                      | What is interpolated                         | Why it is safe                                                                                                                 |
+| ----------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `group.repo.ts` `listGroups`, `getGroup`  | `CARD_COLUMNS`, a list of `WHERE` conditions | Both are fixed strings in the code. Filter **values** are bound as `:gameId`, `:regionId`, `:platformId`, `:limit`, `:offset`. |
+| `group.repo.ts` `updateGroup`             | a list of `SET` assignments                  | Fixed strings chosen by which fields are present. Values are bound as `:title`, `:description`, `:maxMembers`.                 |
+| `group.repo.ts` `callMembershipProcedure` | the procedure name                           | The TypeScript type allows only `'sp_join_group' \| 'sp_leave_group'`. The ids are bound.                                      |
+| `profile.repo.ts` `patchProfile`          | column names                                 | Looked up in a fixed `columns` map. Unknown keys are dropped before the query, and values are bound as `:key`.                 |
+| `profile.repo.ts` `patchUserGame`         | column names                                 | Same pattern: a fixed map, with bound values.                                                                                  |
+| `profile.repo.ts` `existingIdCount`       | table and column name, a `?,?,?` list        | The table and column are typed literals. The ids are bound as `?` placeholders.                                                |
 
 Things the search did **not** find: string concatenation of request data into
 SQL, `multipleStatements: true` on the server pool, or `pool.escape` used as a
@@ -68,25 +68,27 @@ unknown fields.
 
 ## 3. Who can do what
 
-"Member" means an **active** member of that group. A non-member, a former
-member and a group that doesn't exist all get the same 403, so the API never
-reveals which private groups exist (`auth.test.ts`).
+"Member" means an **active** member of that group. On the group routes guarded
+by `requireGroupRole`, a non-member, a former member and a group that doesn't exist
+all get the same 403, so those routes never reveal which groups exist
+(`auth.test.ts`). The two `/api/sessions/:id/…` routes answer 404 for a session
+that doesn't exist.
 
-| Route                                             | Anyone (no login) | Signed in         | Group member                          | Group owner |
-| ------------------------------------------------- | ----------------- | ----------------- | ------------------------------------- | ----------- |
-| `GET /api/health`, `/api/lookups`, `/api/games/*` | ✅                | ✅                | ✅                                    | ✅          |
-| `POST /api/auth/register`, `/login`, `/refresh`   | ✅ (rate-limited) | ✅                | ✅                                    | ✅          |
-| `GET /api/profile/:displayName`                   | ✅ ¹              | ✅ ¹              | ✅ ¹                                  | ✅ ¹        |
-| `GET/PATCH/PUT /api/profile/me…` (own profile)    | ❌ 401            | ✅ own data only  | ✅                                    | ✅          |
-| `GET /api/matches`, `/api/reports/summary`        | ❌ 401            | ✅                | ✅                                    | ✅          |
-| `GET /api/groups`, `GET /api/groups/:id`          | ❌ 401            | ✅                | ✅                                    | ✅          |
-| `POST /api/groups` (create)                       | ❌ 401            | ✅, becomes owner | ✅                                    | ✅          |
-| `POST /api/groups/:id/join`, `/leave`             | ❌ 401            | ✅                | ✅                                    | ✅          |
-| `GET/POST /api/groups/:id/messages`               | ❌ 401            | ❌ 403            | ✅                                    | ✅          |
-| `GET/POST /api/groups/:id/sessions`               | ❌ 401            | ❌ 403            | ✅                                    | ✅          |
-| `PATCH /api/groups/:id` (edit or close)           | ❌ 401            | ❌ 403            | ❌ 403                                | ✅          |
-| `POST /api/sessions/:id/played`                   | ❌ 401            | ❌ 403            | ❌ 403                                | ✅          |
-| `POST /api/sessions/:id/ratings`                  | ❌ 401            | ❌ 409 (trigger)  | ✅, once per teammate, after "played" | ✅          |
+| Route                                               | Anyone (no login) | Signed in         | Group member                          | Group owner |
+| --------------------------------------------------- | ----------------- | ----------------- | ------------------------------------- | ----------- |
+| `GET /api/health`, `/api/lookups`, `/api/games/*`   | ✅                | ✅                | ✅                                    | ✅          |
+| `POST /api/auth/register`, `/login`, password reset | ✅ (rate-limited) | ✅                | ✅                                    | ✅          |
+| `GET /api/profile/:displayName`                     | ✅ ¹              | ✅ ¹              | ✅ ¹                                  | ✅ ¹        |
+| `GET/PATCH/PUT /api/profile/me…` (own profile)      | ❌ 401            | ✅ own data only  | ✅                                    | ✅          |
+| `GET /api/matches`, `/api/reports/summary`          | ❌ 401            | ✅                | ✅                                    | ✅          |
+| `GET /api/groups`, `GET /api/groups/:id`            | ❌ 401            | ✅                | ✅                                    | ✅          |
+| `POST /api/groups` (create)                         | ❌ 401            | ✅, becomes owner | ✅                                    | ✅          |
+| `POST /api/groups/:id/join`, `/leave`               | ❌ 401            | ✅                | ✅                                    | ✅          |
+| `GET/POST /api/groups/:id/messages`                 | ❌ 401            | ❌ 403            | ✅                                    | ✅          |
+| `GET/POST /api/groups/:id/sessions`                 | ❌ 401            | ❌ 403            | ✅                                    | ✅          |
+| `PATCH /api/groups/:id` (edit or close)             | ❌ 401            | ❌ 403            | ❌ 403                                | ✅          |
+| `POST /api/sessions/:id/played`                     | ❌ 401            | ❌ 403            | ❌ 403                                | ✅          |
+| `POST /api/sessions/:id/ratings`                    | ❌ 401            | ❌ 409 (trigger)  | ✅, once per teammate, after "played" | ✅          |
 
 ¹ Public profiles show a rough availability summary (for example
 "weekday evenings"). Exact times are shown only to the person themselves and
@@ -134,6 +136,9 @@ CI, not only by this one-off check.
 - Secrets (`JWT_*`, `DB_PASSWORD`, `DB_SSL_CA`) live only in environment
   variables on Render and in local `.env` files. `.env` is gitignored, and
   `.env.example` holds placeholders only.
-- **Known limit:** the access JWT can't be revoked before its 15 minutes run
-  out. Suspending an account ends its refresh tokens straight away, and
-  `requireAuth` re-checks that the account still exists.
+- **Known limit:** `requireAuth` checks only the JWT signature and expiry, with
+  no database lookup. A suspended or deleted account's access token keeps
+  working on most routes until it expires, which takes at most 15 minutes.
+  `/api/auth/me` reads the account and refuses it at once (`auth.test.ts`).
+  Suspending an account also ends its refresh tokens straight away, so no new
+  access token is issued.

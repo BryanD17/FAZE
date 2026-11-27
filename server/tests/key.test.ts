@@ -73,6 +73,13 @@ function auth(name: string) {
 }
 
 async function cleanUp() {
+  // The CRUD test renames a profile, which writes an audit_log row.
+  await pool.query(
+    `DELETE FROM audit_log
+      WHERE table_name IN ('user', 'profile')
+        AND row_pk IN (SELECT CAST(user_id AS CHAR) FROM \`user\` WHERE email LIKE ?)`,
+    [`%${EMAIL_SUFFIX}`],
+  );
   // Groups and memberships go with their owners (ON DELETE CASCADE).
   await pool.query('DELETE FROM `user` WHERE email LIKE ?', [`%${EMAIL_SUFFIX}`]);
   await pool.query('DELETE FROM game WHERE slug LIKE ?', [`${SLUG_PREFIX}%`]);
@@ -213,10 +220,10 @@ describe('database rules', () => {
     await addMember(groupId, 'second');
     expect(await groupRow(groupId)).toMatchObject({ member_count: 2, status: 'full' });
 
-    await pool.query(`UPDATE group_member SET state = 'left' WHERE group_id = ? AND user_id = ?`, [
-      groupId,
-      users.second,
-    ]);
+    await pool.query(
+      `UPDATE group_member SET state = 'left', left_at = NOW() WHERE group_id = ? AND user_id = ?`,
+      [groupId, users.second],
+    );
     expect(await groupRow(groupId)).toMatchObject({ member_count: 1, status: 'recruiting' });
     await pool.query('DELETE FROM lfg_group WHERE group_id = ?', [groupId]);
   });
