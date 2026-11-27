@@ -17,6 +17,10 @@
  * (see textColor / borderColor / ringColor below), while `bg-accent` stays
  * violet. Same token names, so no page had to change.
  *
+ * Keep content.faint and danger text off surface.overlay (4.3 and 4.4 : 1).
+ * Filled violet shapes on raised cards are 2.4 : 1, so pair them with a
+ * light border or a text label rather than relying on the fill alone.
+ *
  * Feature code uses these semantic names only — a raw hex value in a feature
  * file is a review rejection (convention B.3).
  */
@@ -52,7 +56,7 @@ export default {
         lg: '16px',
       },
       // Lighter violet wherever the accent is text or a thin line on navy.
-      textColor: { accent: { DEFAULT: '#A996FF', hover: '#C9BDFF', muted: '#A996FF' } },
+      textColor: { accent: { DEFAULT: '#A996FF', hover: '#C9BDFF' } },
       borderColor: { accent: { DEFAULT: '#A996FF', hover: '#C9BDFF' } },
       ringColor: { accent: { DEFAULT: '#A996FF', hover: '#C9BDFF' } },
       fontFamily: {

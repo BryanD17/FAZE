@@ -9,7 +9,9 @@ export function Home() {
       <div className="z-10 max-w-2xl p-10">
         <p className="text-sm tracking-[4px] text-content-muted">FIND YOUR GROUP</p>
 
-        <h1 className="my-2.5 text-7xl font-bold sm:text-8xl">FAZE</h1>
+        <h1 className="my-2.5 text-7xl font-bold sm:text-8xl">
+          FA<span className="text-accent">Z</span>E
+        </h1>
 
         <p className="mb-8 text-xl leading-normal text-content-muted">
           Find gamers who play the same games, at the same times, for the same reasons.
