@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { api, ApiError, messageOf } from '../lib/api.ts';
 import type { Message } from '../lib/types.ts';
 import { inputClass, primaryButtonClass } from './Field.tsx';
+import { ErrorNotice } from './LoadState.tsx';
 
 const POLL_MS = 5000;
 
@@ -11,7 +12,8 @@ function isMissingEndpoint(err: unknown) {
 
 export function ChatBox({ groupId }: { groupId: number }) {
   const [messages, setMessages] = useState<Message[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [sendError, setSendError] = useState<string | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
@@ -25,11 +27,11 @@ export function ChatBox({ groupId }: { groupId: number }) {
       const reply = await api<{ messages: Message[] }>(`/groups/${groupId}/messages`);
       if (isStale()) return;
       setMessages([...reply.messages].reverse());
-      setError(null);
+      setLoadError(null);
     } catch (err) {
       if (isStale()) return;
       if (isMissingEndpoint(err)) setUnavailable(true);
-      else setError(messageOf(err));
+      else setLoadError(err);
     }
   }, [groupId]);
 
@@ -52,14 +54,14 @@ export function ChatBox({ groupId }: { groupId: number }) {
     const body = draft.trim();
     if (!body) return;
     setSending(true);
-    setError(null);
+    setSendError(null);
     try {
       await api(`/groups/${groupId}/messages`, { method: 'POST', body: { body } });
       setDraft('');
       await load();
     } catch (err) {
       if (isMissingEndpoint(err)) setUnavailable(true);
-      else setError(messageOf(err));
+      else setSendError(messageOf(err));
     } finally {
       setSending(false);
     }
@@ -72,9 +74,16 @@ export function ChatBox({ groupId }: { groupId: number }) {
         <p className="text-content-muted">Chat is not available yet.</p>
       ) : (
         <>
+          {loadError ? (
+            <div className="mb-3">
+              <ErrorNotice error={loadError} onRetry={() => void load()} />
+            </div>
+          ) : null}
           <div className="mb-3 flex max-h-96 flex-col gap-2 overflow-y-auto rounded-sm border border-subtle bg-surface-raised p-3">
             {messages === null ? (
-              <p className="text-sm text-content-muted">Loading…</p>
+              <p className="text-sm text-content-muted">
+                {loadError ? 'Messages could not be loaded.' : 'Loading…'}
+              </p>
             ) : messages.length === 0 ? (
               <p className="text-sm text-content-muted">No messages yet. Say hello.</p>
             ) : (
@@ -107,7 +116,7 @@ export function ChatBox({ groupId }: { groupId: number }) {
               {sending ? 'Sending…' : 'Send'}
             </button>
           </form>
-          {error && <p className="mt-2 text-sm text-danger">{error}</p>}
+          {sendError && <p className="mt-2 text-sm text-danger">{sendError}</p>}
         </>
       )}
     </section>

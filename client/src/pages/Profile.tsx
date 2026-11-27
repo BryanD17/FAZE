@@ -7,6 +7,7 @@ import {
   secondaryButtonClass,
 } from '../components/Field.tsx';
 import { GameSearch } from '../components/GameSearch.tsx';
+import { ErrorNotice, Loading } from '../components/LoadState.tsx';
 import { api, ApiError, messageOf } from '../lib/api.ts';
 import { toggle } from '../lib/list.ts';
 import type { Game, Lookups } from '../lib/types.ts';
@@ -39,7 +40,8 @@ export function Profile() {
   const [lookups, setLookups] = useState<Lookups | null>(null);
   const [form, setForm] = useState<Form | null>(null);
   const [games, setGames] = useState<Game[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<unknown>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export function Profile() {
 
   useEffect(() => {
     let cancelled = false;
+    setLoadError(null);
     Promise.all([
       api<Lookups>('/lookups'),
       api<Me>('/profile/me'),
@@ -76,24 +79,24 @@ export function Profile() {
         });
       })
       .catch((err: unknown) => {
-        if (!cancelled) setLoadError(messageOf(err));
+        if (!cancelled) setLoadError(err);
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [loadAttempt]);
 
   if (loadError) {
     return (
       <Shell>
-        <p className="text-danger">{loadError}</p>
+        <ErrorNotice error={loadError} onRetry={() => setLoadAttempt((n) => n + 1)} />
       </Shell>
     );
   }
   if (!lookups || !form) {
     return (
       <Shell>
-        <p className="text-content-muted">Loading…</p>
+        <Loading label="Loading your profile…" />
       </Shell>
     );
   }
@@ -322,7 +325,7 @@ export function Profile() {
         </fieldset>
 
         {formError && <p className="text-sm text-danger">{formError}</p>}
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-4">
           <button type="submit" disabled={saving} className={primaryButtonClass}>
             {saving ? 'Saving…' : 'Save profile'}
           </button>
@@ -334,15 +337,18 @@ export function Profile() {
         <h2 className="text-xl font-semibold">Favourite games</h2>
         <p className="text-sm text-content-muted">Changes here are saved right away.</p>
         {games.length === 0 ? (
-          <p className="text-sm text-content-muted">No games added yet.</p>
+          <p className="text-sm text-content-muted">
+            No games added yet. Search below to add the games you play; they count for half of every
+            match score.
+          </p>
         ) : (
           <ul className="flex flex-col gap-2">
             {games.map((g) => (
               <li
                 key={g.id}
-                className="flex items-center justify-between rounded-sm border border-subtle bg-surface-raised px-3 py-2"
+                className="flex items-center justify-between gap-3 rounded-sm border border-subtle bg-surface-raised px-3 py-2"
               >
-                {g.title}
+                <span className="min-w-0 break-words">{g.title}</span>
                 <button
                   type="button"
                   className={secondaryButtonClass}
