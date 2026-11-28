@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ChatBox } from '../components/ChatBox.tsx';
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../components/Field.tsx';
 import { GameInitial, memberCountLabel } from '../components/GroupCard.tsx';
+import { ErrorNotice, Loading } from '../components/LoadState.tsx';
 import { SessionsBox } from '../components/SessionsBox.tsx';
 import { api, ApiError, messageOf } from '../lib/api.ts';
 import type { GroupDetail as GroupDetailData, LeaveResult } from '../lib/types.ts';
@@ -39,9 +40,19 @@ export function GroupDetail() {
     return <NotFound />;
   }
   if (error) {
-    return <p className="p-10 text-danger">{messageOf(error)}</p>;
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-10">
+        <ErrorNotice error={error} onRetry={reload} />
+      </main>
+    );
   }
-  if (!group) return <p className="p-10 text-content-muted">Loading…</p>;
+  if (!group) {
+    return (
+      <main className="mx-auto max-w-3xl px-4 py-10">
+        <Loading label="Loading group…" />
+      </main>
+    );
+  }
 
   const isMember = group.myRole !== null;
   const isOwner = group.myRole === 'owner';
@@ -118,7 +129,7 @@ export function GroupDetail() {
         <GameInitial title={group.gameTitle} size="h-20 w-20" />
         <div className="flex min-w-0 flex-col gap-1">
           <p className="text-sm text-content-muted">{group.gameTitle}</p>
-          <h1 className="text-3xl font-semibold">{group.title}</h1>
+          <h1 className="break-words text-2xl font-semibold sm:text-3xl">{group.title}</h1>
           <p className="text-sm text-content-muted">
             {group.regionName} · {group.languageCode} ·{' '}
             <span className="tabular-nums">{memberCountLabel(group)}</span> members
@@ -221,9 +232,9 @@ export function GroupDetail() {
           {group.members.map((member) => (
             <li
               key={member.userId}
-              className="flex items-center justify-between rounded-sm border border-subtle bg-surface-raised px-3 py-2"
+              className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-sm border border-subtle bg-surface-raised px-3 py-2"
             >
-              <span>
+              <span className="min-w-0 break-words">
                 {member.displayName}
                 {member.role !== 'member' && (
                   <span className="ml-2 text-sm text-content-muted">({member.role})</span>

@@ -4,6 +4,7 @@ import { api, messageOf } from '../lib/api.ts';
 import { useAuth } from '../lib/auth.tsx';
 import type { GroupMember, PlaySession } from '../lib/types.ts';
 import { useApi } from '../lib/useApi.ts';
+import { ErrorNotice, Loading } from './LoadState.tsx';
 import { inputClass, primaryButtonClass, secondaryButtonClass } from './Field.tsx';
 
 export function SessionsBox({
@@ -100,11 +101,13 @@ export function SessionsBox({
       </form>
 
       {sessions.error ? (
-        <p className="text-sm text-danger">{messageOf(sessions.error)}</p>
+        <ErrorNotice error={sessions.error} onRetry={sessions.reload} />
       ) : !sessions.data ? (
-        <p className="text-sm text-content-muted">Loading…</p>
+        <Loading label="Loading sessions…" />
       ) : sessions.data.sessions.length === 0 ? (
-        <p className="text-sm text-content-muted">No sessions scheduled yet.</p>
+        <p className="text-sm text-content-muted">
+          No sessions scheduled yet. Pick a date and time above to plan the first one.
+        </p>
       ) : (
         <ul className="flex flex-col gap-3">
           {sessions.data.sessions.map((session) => (

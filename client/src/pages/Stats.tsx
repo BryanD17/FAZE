@@ -1,4 +1,4 @@
-import { messageOf } from '../lib/api.ts';
+import { Empty, ErrorNotice, Loading } from '../components/LoadState.tsx';
 import { useApi } from '../lib/useApi.ts';
 
 type Summary = {
@@ -27,7 +27,7 @@ const labels: { key: keyof Summary['totals']; label: string }[] = [
 ];
 
 export function Stats() {
-  const { data, error } = useApi<Summary>('/reports/summary');
+  const { data, error, reload } = useApi<Summary>('/reports/summary');
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-10">
@@ -35,9 +35,9 @@ export function Stats() {
       <p className="mb-6 text-content-muted">A live snapshot from the FAZE database.</p>
 
       {error ? (
-        <p className="text-danger">{messageOf(error)}</p>
+        <ErrorNotice error={error} onRetry={reload} />
       ) : !data ? (
-        <p className="text-content-muted">Loading…</p>
+        <Loading label="Loading stats…" />
       ) : (
         <>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -63,26 +63,30 @@ export function Stats() {
 
           <section className="mt-8">
             <h2 className="mb-3 text-xl font-semibold">Popular games</h2>
-            <div className="overflow-x-auto rounded-sm border border-subtle">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-surface-raised text-content-muted">
-                  <tr>
-                    <th className="px-3 py-2 font-medium">Game</th>
-                    <th className="px-3 py-2 text-right font-medium">Active groups</th>
-                    <th className="px-3 py-2 text-right font-medium">Searching users</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.popularGames.map((game) => (
-                    <tr key={game.gameId} className="border-t border-subtle">
-                      <td className="px-3 py-2">{game.title}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{game.activeGroups}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">{game.searchingUsers}</td>
+            {data.popularGames.length === 0 ? (
+              <Empty>No games have open groups or searching players yet.</Empty>
+            ) : (
+              <div className="overflow-x-auto rounded-sm border border-subtle">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-surface-raised text-content-muted">
+                    <tr>
+                      <th className="px-3 py-2 font-medium">Game</th>
+                      <th className="px-3 py-2 text-right font-medium">Active groups</th>
+                      <th className="px-3 py-2 text-right font-medium">Searching users</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {data.popularGames.map((game) => (
+                      <tr key={game.gameId} className="border-t border-subtle">
+                        <td className="px-3 py-2">{game.title}</td>
+                        <td className="px-3 py-2 text-right tabular-nums">{game.activeGroups}</td>
+                        <td className="px-3 py-2 text-right tabular-nums">{game.searchingUsers}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
         </>
       )}

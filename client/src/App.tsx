@@ -18,14 +18,17 @@ const appLinks = [
   { to: '/stats', label: 'Stats' },
 ];
 
+// px-2 py-2 gives each link a comfortable tap target (about 40 px tall) on a phone.
+const navItem = 'rounded-sm px-2 py-2';
+
 function navClass({ isActive }: { isActive: boolean }) {
-  return isActive ? 'text-accent' : 'text-content-muted hover:text-content-primary';
+  return `${navItem} ${isActive ? 'text-accent' : 'text-content-muted hover:text-content-primary'}`;
 }
 
 function Header() {
   const { state, logout } = useAuth();
   return (
-    <header className="flex h-16 items-center justify-between border-b border-subtle px-6">
+    <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-subtle px-4 py-3 sm:px-6">
       <NavLink
         to="/"
         aria-label="FAZE home"
@@ -33,7 +36,7 @@ function Header() {
       >
         FA<span className="text-accent">Z</span>E
       </NavLink>
-      <nav className="flex items-center gap-5">
+      <nav className="-mx-2 flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-3">
         {appLinks.map((link) => (
           <NavLink key={link.to} to={link.to} className={navClass}>
             {link.label}
@@ -42,7 +45,7 @@ function Header() {
         {state.status === 'signedIn' && (
           <button
             type="button"
-            className="text-content-muted hover:text-content-primary"
+            className={`${navItem} text-content-muted hover:text-content-primary`}
             onClick={() => void logout()}
           >
             Log out

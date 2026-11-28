@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { CreateGroupForm } from '../components/CreateGroupForm.tsx';
 import { inputClass, primaryButtonClass, secondaryButtonClass } from '../components/Field.tsx';
 import { GroupCard } from '../components/GroupCard.tsx';
-import { messageOf } from '../lib/api.ts';
+import { Empty, ErrorNotice, Loading } from '../components/LoadState.tsx';
 import type { Game, GroupListReply, LookupItem, Lookups } from '../lib/types.ts';
 import { useApi } from '../lib/useApi.ts';
 
@@ -65,7 +65,7 @@ export function Groups() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-semibold">Groups</h1>
         {!creating && lookups.data && (
           <button type="button" className={primaryButtonClass} onClick={() => setCreating(true)}>
@@ -104,14 +104,28 @@ export function Groups() {
         />
       </div>
 
-      {filterError ? <p className="mb-4 text-sm text-danger">{messageOf(filterError)}</p> : null}
+      {filterError ? (
+        <div className="mb-4">
+          <ErrorNotice
+            error={filterError}
+            onRetry={() => {
+              lookups.reload();
+              popular.reload();
+            }}
+          />
+        </div>
+      ) : null}
 
       {list.error ? (
-        <p className="text-danger">{messageOf(list.error)}</p>
+        <ErrorNotice error={list.error} onRetry={list.reload} />
       ) : !list.data ? (
-        <p className="text-content-muted">Loading…</p>
+        <Loading label="Loading groups…" />
       ) : list.data.groups.length === 0 ? (
-        <p className="text-content-muted">No groups match these filters yet.</p>
+        <Empty>
+          {['gameId', 'platformId', 'regionId'].some((key) => params.has(key))
+            ? 'No groups match these filters yet. Try “Any” on one of them, or create a group.'
+            : 'No open groups yet. Be the first: press “Create group”.'}
+        </Empty>
       ) : (
         <ul className="flex flex-col gap-3">
           {list.data.groups.map((g) => (

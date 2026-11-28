@@ -17,7 +17,11 @@ export function useApi<T>(path: string) {
     };
   }, [path, version]);
 
-  const reload = useCallback(() => setVersion((v) => v + 1), []);
+  // Clear the old result first, so "Try again" shows the loading state.
+  const reload = useCallback(() => {
+    setState({ data: null, error: null });
+    setVersion((v) => v + 1);
+  }, []);
 
   return { ...state, reload };
 }
