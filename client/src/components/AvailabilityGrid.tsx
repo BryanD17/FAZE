@@ -39,6 +39,22 @@ export function AvailabilityGrid({
   const latest = useRef(cells);
   latest.current = cells;
   const buttons = useRef(new Map<string, HTMLButtonElement>());
+  const scrollBox = useRef<HTMLDivElement>(null);
+  const scrolled = useRef(false);
+
+  // Open the grid at the person's earliest free hour (or 18:00 when there is
+  // none), not at midnight, so saved evenings are visible without scrolling.
+  useEffect(() => {
+    if (scrolled.current) return;
+    const hours = cells.flatMap((row) => row.flatMap((on, hour) => (on ? [hour] : [])));
+    const first = hours.length > 0 ? Math.min(...hours) : 18;
+    const cell = buttons.current.get(`0:${first}`);
+    const box = scrollBox.current;
+    if (!box || !cell) return;
+    const offset = cell.getBoundingClientRect().top - box.getBoundingClientRect().top;
+    box.scrollTop = Math.max(0, box.scrollTop + offset - 40);
+    if (hours.length > 0) scrolled.current = true;
+  }, [cells]);
 
   // A drag that ends outside the grid still has to stop painting.
   useEffect(() => {
@@ -137,7 +153,10 @@ export function AvailabilityGrid({
           {total} {total === 1 ? 'hour' : 'hours'} a week selected.
         </span>
       </p>
-      <div className="max-h-[28rem] overflow-auto rounded-sm border border-subtle bg-surface-raised">
+      <div
+        ref={scrollBox}
+        className="max-h-[28rem] overflow-auto rounded-sm border border-subtle bg-surface-raised"
+      >
         <table
           role="grid"
           aria-label="Weekly availability"
