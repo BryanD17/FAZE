@@ -8,18 +8,21 @@ and pull requests). This page only lists _your_ work.
 
 ## Phase 2: what to do now (due Mon 7 Dec)
 
+> **Dates moved forward:** the final presentation is on **Tue 1 Dec**. See
+> the key dates in [`../PHASE2.md`](../PHASE2.md).
+
 The full plan is in [`../PHASE2.md`](../PHASE2.md). Each issue has the
 step-by-step details. Your part, in order:
 
-1. **Play sessions and ratings** (#48, about 1 day, merged by **Tue 1 Dec**).
+1. ✅ **Play sessions and ratings** (#48, about 1 day, merged by **Tue 1 Dec**).
    The tables, the stored procedure and the rating trigger already exist; you
    add the routes, two small screens on the group page, and about 5 tests.
-2. **The group owner can edit or close a group** (#49, about 2 hours, Tue 1 Dec).
-3. **Database stats page** (#51, about 2 hours, Tue 1 Dec). The API already
+2. ✅ **The group owner can edit or close a group** (#49, about 2 hours, Tue 1 Dec).
+3. ✅ **Database stats page** (#51, about 2 hours, Tue 1 Dec). The API already
    exists; this is one page at `/stats`.
-4. **Concurrency experiment** (#50, half a day, results by **Wed 2 Dec**): 50,
+4. ✅ **Concurrency experiment** (#50, half a day, results by **Wed 2 Dec**): 50,
    100 and 200 people joining at once, with a table and a chart.
-5. **Demo environment guide** (#32, about 3 hours, before Fri 4 Dec).
+5. ✅ **Demo environment guide** (#32, about 3 hours, before Fri 4 Dec).
 
 Feature freeze is **Tue 1 Dec**: after that, only bug fixes. Bryan reviews and
 merges your PRs.
