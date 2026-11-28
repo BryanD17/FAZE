@@ -6,8 +6,10 @@ import {
   primaryButtonClass,
   secondaryButtonClass,
 } from '../components/Field.tsx';
+import { AvailabilityGrid } from '../components/AvailabilityGrid.tsx';
 import { GameSearch } from '../components/GameSearch.tsx';
 import { api, ApiError, messageOf } from '../lib/api.ts';
+import { cellsToSlots, slotsToCells, type Cells } from '../lib/availabilityGrid.ts';
 import { toggle } from '../lib/list.ts';
 import type { Game, Lookups } from '../lib/types.ts';
 
@@ -26,10 +28,19 @@ type Form = {
   timezone: string;
   platformIds: number[];
   tagIds: number[];
+  /** The slots as last loaded or saved; sent back unchanged if the grid was not touched. */
   slots: LocalAvailabilitySlot[];
+  cells: Cells;
+  /** True once the person changes the grid, so untouched half-hour slots are not rounded. */
+  gridChanged: boolean;
+  /** True when a saved slot did not start or end on the hour. */
+  rounded: boolean;
 };
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+function fromSlots(slots: LocalAvailabilitySlot[]) {
+  const { cells, rounded } = slotsToCells(slots);
+  return { slots, cells, rounded, gridChanged: false };
+}
 const TIMEZONES = Intl.supportedValuesOf('timeZone');
 const BROWSER_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const MAX_TAGS = 5;
@@ -72,7 +83,7 @@ export function Profile() {
             .filter((p) => me.platforms.includes(p.slug))
             .map((p) => p.id),
           tagIds: lookupData.tags.filter((t) => me.tags.includes(t.slug)).map((t) => t.id),
-          slots: availability.local,
+          ...fromSlots(availability.local),
         });
       })
       .catch((err: unknown) => {
@@ -103,11 +114,6 @@ export function Profile() {
     setSaved(false);
   }
 
-  function changeSlot(index: number, patch: Partial<LocalAvailabilitySlot>) {
-    if (!form) return;
-    change({ slots: form.slots.map((s, i) => (i === index ? { ...s, ...patch } : s)) });
-  }
-
   async function onSave(event: FormEvent) {
     event.preventDefault();
     if (!form) return;
@@ -120,11 +126,16 @@ export function Profile() {
       setErrors({ displayName: name.error.issues[0]?.message ?? 'Invalid display name.' });
       return;
     }
-    const slots = availabilitySetSchema.safeParse(form.slots);
+    const slots = availabilitySetSchema.safeParse(
+      form.gridChanged ? cellsToSlots(form.cells) : form.slots,
+    );
     if (!slots.success) {
-      const issue = slots.error.issues[0];
-      const row = typeof issue?.path[0] === 'number' ? `Row ${issue.path[0] + 1}: ` : '';
-      setErrors({ availability: `${row}${issue?.message ?? 'Invalid time.'}` });
+      const tooMany = slots.error.issues.some((i) => i.code === 'too_big' && i.path.length === 0);
+      setErrors({
+        availability: tooMany
+          ? 'That is more than 50 separate blocks of time. Join some neighbouring hours together.'
+          : (slots.error.issues[0]?.message ?? 'Invalid time.'),
+      });
       return;
     }
 
@@ -147,7 +158,7 @@ export function Profile() {
         method: 'PUT',
         body: slots.data,
       });
-      change({ slots: availability.local });
+      change(fromSlots(availability.local));
       setSaved(true);
     } catch (err) {
       if (err instanceof ApiError && err.field && FIELDS.includes(err.field)) {
@@ -264,60 +275,18 @@ export function Profile() {
               ))}
             </select>
           </Field>
-          {form.slots.length === 0 && (
-            <p className="text-sm text-content-muted">No times added yet.</p>
+          <AvailabilityGrid
+            cells={form.cells}
+            timezone={form.timezone}
+            onChange={(cells) => change({ cells, gridChanged: true })}
+          />
+          {form.rounded && (
+            <p className="text-sm text-content-muted">
+              {form.gridChanged
+                ? 'Some saved times did not start on the hour. Saving now stores the whole hours shown in the grid.'
+                : 'Some saved times do not start on the hour, so the grid shows the whole hour. They stay exactly as saved unless you change the grid.'}
+            </p>
           )}
-          {form.slots.map((slot, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <select
-                aria-label="Day"
-                className={inputClass}
-                value={slot.dayOfWeek}
-                onChange={(e) => changeSlot(index, { dayOfWeek: Number(e.target.value) })}
-              >
-                {DAYS.map((day, i) => (
-                  <option key={day} value={i}>
-                    {day}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="time"
-                aria-label="Start"
-                className={inputClass}
-                value={slot.startLocal}
-                onChange={(e) => changeSlot(index, { startLocal: e.target.value })}
-              />
-              <span className="text-content-muted">to</span>
-              <input
-                type="time"
-                aria-label="End"
-                className={inputClass}
-                value={slot.endLocal}
-                onChange={(e) => changeSlot(index, { endLocal: e.target.value })}
-              />
-              <button
-                type="button"
-                className={secondaryButtonClass}
-                onClick={() => change({ slots: form.slots.filter((_, i) => i !== index) })}
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-          <div>
-            <button
-              type="button"
-              className={secondaryButtonClass}
-              onClick={() =>
-                change({
-                  slots: [...form.slots, { dayOfWeek: 1, startLocal: '18:00', endLocal: '22:00' }],
-                })
-              }
-            >
-              Add time
-            </button>
-          </div>
           {errors.availability && <p className="text-sm text-danger">{errors.availability}</p>}
         </fieldset>
 
