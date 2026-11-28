@@ -10,14 +10,17 @@ easy to demo. Anything not on this page needs Bryan's OK first.
 
 ## Key dates
 
-| Date          | What has to be true                                                               |
-| ------------- | --------------------------------------------------------------------------------- |
-| Tue 1 Dec     | **Feature freeze.** Every feature PR below is merged. After this, only bug fixes. |
-| Wed 2 Dec     | Experiment results are in [`experiments.md`](experiments.md) (Bryan and Alvin).   |
-| Thu 3 Dec     | Final screenshots retaken with the new look (nickayvy).                           |
-| Fri 4 Dec     | Draft of the final document and the deck shared with the team.                    |
-| Sun 6 Dec     | Everyone runs the full demo on the live site and reports anything broken.         |
-| **Mon 7 Dec** | **Hand-in:** document, deck, demo video, website link, peer evaluations.          |
+The final presentation moved forward to **Tue 1 Dec**, so everything the
+presentation needs is due before it.
+
+| Date          | What has to be true                                                                  |
+| ------------- | ------------------------------------------------------------------------------------ |
+| Sat 28 Nov    | Every feature PR merged (**feature freeze**). Screenshots retaken with the new look. |
+| Sun 29 Nov    | Final deck shared with the team. Live site tested end to end.                        |
+| Mon 30 Nov    | Rehearse the presentation once, with the live demo and the backup video.             |
+| **Tue 1 Dec** | **Final presentation.** After this, only bug fixes and writing.                      |
+| Fri 4 Dec     | Draft of the final document shared with the team.                                    |
+| **Mon 7 Dec** | **Hand-in:** final document, deck, demo video, website link, peer evaluations.       |
 
 ## Who does what
 

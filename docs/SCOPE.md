@@ -93,11 +93,12 @@ JavaScript only passes the user id in and returns the rows.
 
 ## Timetable
 
-| Dates          | Goal                                                                                                                                          |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2 – 8 Oct      | nickayvy builds the groups API and the website base. Bryan builds the match query.                                                            |
-| 9 – 15 Oct     | nickayvy builds the main screens and the demo data script. Alvin builds the messages API. Bryan writes the ER diagram and normalisation text. |
-| 16 – 19 Oct    | Bryan assembles and submits **Phase 1** (due **19 Oct, 11:59 pm**). Everyone adds one paragraph about their part.                             |
-| 23 Nov – 1 Dec | Phase 2 features merged (**feature freeze Tue 1 Dec**). See [`PHASE2.md`](PHASE2.md).                                                         |
-| 2 – 6 Dec      | Experiments, final screenshots, final document and deck.                                                                                      |
-| 7 Dec          | **Phase 2 due, 11:59 pm.**                                                                                                                    |
+| Dates       | Goal                                                                                                                                          |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2 – 8 Oct   | nickayvy builds the groups API and the website base. Bryan builds the match query.                                                            |
+| 9 – 15 Oct  | nickayvy builds the main screens and the demo data script. Alvin builds the messages API. Bryan writes the ER diagram and normalisation text. |
+| 16 – 19 Oct | Bryan assembles and submits **Phase 1** (due **19 Oct, 11:59 pm**). Everyone adds one paragraph about their part.                             |
+| 23 – 28 Nov | Phase 2 features merged (**feature freeze Sat 28 Nov**). See [`PHASE2.md`](PHASE2.md).                                                        |
+| 1 Dec       | **Final presentation.**                                                                                                                       |
+| 2 – 6 Dec   | Final document and demo video.                                                                                                                |
+| 7 Dec       | **Phase 2 due, 11:59 pm.**                                                                                                                    |

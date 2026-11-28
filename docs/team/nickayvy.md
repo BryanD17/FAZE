@@ -15,6 +15,9 @@ screenshot) in the PR so the rest of us can see what changed.
 
 ## Phase 2: what to do now (due Mon 7 Dec)
 
+> **Dates moved forward:** the final presentation is on **Tue 1 Dec**. See
+> the key dates in [`../PHASE2.md`](../PHASE2.md).
+
 The full plan is in [`../PHASE2.md`](../PHASE2.md). Each issue has the
 step-by-step details. Your part, in order:
 

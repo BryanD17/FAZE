@@ -154,8 +154,10 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 | 9 – 15 Oct      | nickayvy builds the main screens and the demo data script. Alvin builds messages. Bryan writes the ER diagram and normalisation text.             |
 | 16 – 19 Oct     | **Phase 1 due 19 Oct, 11:59 pm** (discussion post 50 pts + submission link 100 pts). Bryan submits; everyone adds one paragraph about their part. |
 | 20 Oct – 22 Nov | Hosting set up on Vercel, Render and Aiven.                                                                                                       |
-| 23 Nov – 1 Dec  | Phase 2 features, built and merged (**feature freeze Tue 1 Dec**).                                                                                |
-| 2 – 6 Dec       | Experiments, final screenshots, final document and deck, full demo check on Sun 6 Dec.                                                            |
+| 23 – 28 Nov     | Phase 2 features built and merged (**feature freeze Sat 28 Nov**), experiments, new screenshots.                                                  |
+| 29 – 30 Nov     | Final deck shared, live site tested, one rehearsal.                                                                                               |
+| 1 Dec           | **Final presentation.**                                                                                                                           |
+| 2 – 6 Dec       | Final document and demo video.                                                                                                                    |
 | 7 Dec           | **Phase 2 due, 11:59 pm.**                                                                                                                        |
 
 ## How we work together
@@ -163,7 +165,8 @@ web viewer for the database) is at <http://localhost:8080> if you used Docker
 - **One task = one branch = one pull request.** Never push straight to `main`.
 - **Bryan reviews and merges.** nickayvy may merge his own pull requests once
   both checks are green; everyone else waits for Bryan.
-- **Feature freeze on Tue 1 Dec.** After that, only bug fixes go into `main`.
+- **Feature freeze on Sat 28 Nov** (the final presentation is on Tue 1 Dec).
+  After that, only bug fixes go into `main`.
 - **Show real output** (test results, a JSON reply, a screenshot) in your pull
   request. "It works" is not enough.
 - Questions go in Discord `#project-ideas`; pull request links in `#github-links`.
