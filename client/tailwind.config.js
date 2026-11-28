@@ -1,9 +1,25 @@
 /**
  * FAZE design tokens.
  *
- * Visual direction is decided (master prompt AGENT 10): dark-first, high
- * contrast, "gaming without the neon soup." Cover art supplies the colour;
- * the chrome stays neutral so twenty game thumbnails do not fight the UI.
+ * The FAZE look (issue #54), shared with the presentation deck: dark navy,
+ * one violet accent, Space Grotesk for headings and DM Sans for text.
+ *
+ * Contrast (WCAG 2.1, checked against surface / raised):
+ *   content.primary #F4F3EE   16.1 / 14.2 : 1
+ *   content.muted   #BFC4DA   10.3 /  9.1 : 1
+ *   content.faint   #8A90AD    5.7 /  5.0 : 1
+ *   accent text     #A996FF    7.2 /  6.4 : 1
+ *   danger          #F0686C    5.9 /  5.2 : 1
+ *   primary text on the violet button #5B3FE0: 5.8 : 1 (6.9 on hover)
+ *
+ * The violet #5B3FE0 is only 2.8 : 1 on navy, too dark for text. So
+ * `text-accent`, `border-accent` and `ring-accent` use the lighter #A996FF
+ * (see textColor / borderColor / ringColor below), while `bg-accent` stays
+ * violet. Same token names, so no page had to change.
+ *
+ * Keep content.faint and danger text off surface.overlay (4.3 and 4.4 : 1).
+ * Filled violet shapes on raised cards are 2.4 : 1, so pair them with a
+ * light border or a text label rather than relying on the fill alone.
  *
  * Feature code uses these semantic names only — a raw hex value in a feature
  * file is a review rejection (convention B.3).
@@ -15,32 +31,37 @@ export default {
     extend: {
       colors: {
         surface: {
-          DEFAULT: '#0B0D12', // page background
-          raised: '#14171F', // cards, menus, modals
-          overlay: '#1C202B', // hover / pressed states on raised surfaces
+          DEFAULT: '#12162B', // page background (navy)
+          raised: '#1B2040', // cards, menus, modals: a step lighter
+          overlay: '#262C52', // hover / pressed states on raised surfaces
         },
         content: {
-          primary: '#F2F4F8',
-          muted: '#A7AEBF', // 7.3:1 on #0B0D12 — clears WCAG AA for body text
-          faint: '#6B7285', // decorative only, never load-bearing text
+          primary: '#F4F3EE',
+          muted: '#BFC4DA',
+          faint: '#8A90AD', // timestamps and hints; still 5:1 on raised
         },
         accent: {
-          DEFAULT: '#5B8CFF',
-          hover: '#7BA1FF',
-          muted: '#1E2A4A',
+          DEFAULT: '#5B3FE0', // violet, for filled buttons and bars
+          hover: '#4E33D1',
+          muted: '#2A2366',
         },
         success: '#3FBF7F',
         warn: '#E0A33E',
-        danger: '#E5484D',
-        subtle: '#262B36', // borders and dividers
+        danger: '#F0686C',
+        subtle: '#2E3458', // borders and dividers
       },
       borderRadius: {
         DEFAULT: '12px',
         sm: '8px',
         lg: '16px',
       },
+      // Lighter violet wherever the accent is text or a thin line on navy.
+      textColor: { accent: { DEFAULT: '#A996FF', hover: '#C9BDFF' } },
+      borderColor: { accent: { DEFAULT: '#A996FF', hover: '#C9BDFF' } },
+      ringColor: { accent: { DEFAULT: '#A996FF', hover: '#C9BDFF' } },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        sans: ['"DM Sans"', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        display: ['"Space Grotesk"', '"DM Sans"', 'system-ui', 'sans-serif'],
       },
       fontVariantNumeric: {
         // Match scores and member counts must not jitter as digits change.

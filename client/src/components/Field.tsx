@@ -5,7 +5,7 @@ export const inputClass =
   'w-full rounded-sm border border-subtle bg-surface-raised px-3 py-2 text-content-primary';
 
 export const primaryButtonClass =
-  'rounded-sm bg-accent px-5 py-2.5 font-medium text-surface hover:bg-accent-hover disabled:opacity-60';
+  'rounded-sm bg-accent px-5 py-2.5 font-medium text-content-primary hover:bg-accent-hover disabled:opacity-60';
 
 export const secondaryButtonClass =
   'rounded-sm border border-subtle px-3 py-1.5 text-sm text-content-muted hover:bg-surface-overlay hover:text-content-primary disabled:opacity-60';
