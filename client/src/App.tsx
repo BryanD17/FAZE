@@ -29,8 +29,12 @@ function Header() {
   const { state, logout } = useAuth();
   return (
     <header className="flex min-h-16 flex-wrap items-center justify-between gap-x-6 gap-y-2 border-b border-subtle px-4 py-3 sm:px-6">
-      <NavLink to="/" className="text-xl font-bold">
-        FAZE
+      <NavLink
+        to="/"
+        aria-label="FAZE home"
+        className="font-display text-2xl font-bold tracking-tight"
+      >
+        FA<span className="text-accent">Z</span>E
       </NavLink>
       <nav className="-mx-2 flex flex-wrap items-center gap-x-1 gap-y-1 sm:gap-x-3">
         {appLinks.map((link) => (
